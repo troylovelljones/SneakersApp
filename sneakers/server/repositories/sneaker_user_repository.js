@@ -1,5 +1,8 @@
-const sequelize = require("../repositories/sneakers_app_database");
-const {createSelectStatement, createInsertStatement} = require('../repositories/utils/postgresql_utilities');
+
+const SNEAKER_APP_DB = '../../../core/server/repositories/sneakers_app_database';
+const POSTGRESQL_UTILS = '../../../core/server/repositories/utils/postgresql_utilities'
+const sequelize = require(SNEAKER_APP_DB);
+const {createSelectStatement, createInsertStatement} = require(POSTGRESQL_UTILS);
 const {QueryTypes} = require("sequelize");
 const showSql = true;
 const TEST = true;

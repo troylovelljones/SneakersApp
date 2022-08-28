@@ -1,37 +1,25 @@
 const userContainer = document.querySelector('#user-info');
 const loginForm = document.querySelector('#login-form');
 const registerForm = document.querySelector('#register-form');
-const messageDisplay = document.querySelector('.errors');
+const messageDisplay = document.querySelector('.messages');
 
 const DEBUG = true;
 
 const DOMAIN_NAME = DEBUG && `http://localhost:` || `https://yoursneakercollection.com`;
 const SERVER_PORT = 4000;
 
-const BAD_LOGIN = 'Your username or password is not correct';
-const BAD_REG = 'Your registration information is invalid.  \n\nPlease make sure your username contains only' +
-' letters and numbers and your password contains letters, numbers, at least one special character' +
-' and at least one uppercase letter.';
-const BLANK_INFO = `You must enter a value for username, password, and email address!`;
-const NEED_MATCHING_PASSWORDS = `The passwords you entered to not match!`;
-const UNEXPECTED_ERROR = `An unexpected error occured. Please try to register at a later time`;
-
-
-const authUrl = '/api/v1/register';
+const authUrl = '/api/v1/login';
 const regUrl = '/api/v1/register';
 const baseUrl = `${DOMAIN_NAME}`;
 
-import {STRONG_PASSWORD, VALID_EMAIL, VALID_USER_NAME} from "../../../../core/data-validation/validation.js";
-
-
-
 const login = body => {
-    axios.post(`${baseUrl + SERVER_PORT + authUrl}`, body).then( res => {
+  console.log('Posting login information.');  
+  axios.post(`${baseUrl + SERVER_PORT + authUrl}`, body).then( res => {
   createUserCard(res.data);
   console.log(res.data);
 }).catch(err => {
   console.log(err);
-  alert(err.response.data);
+  displayMessage(err.response.data);
 
 })}
 const register = async (body) => {
@@ -43,19 +31,13 @@ const register = async (body) => {
     axios.post(`${baseUrl + SERVER_PORT + regUrl}`, body).then(res => {
         console.log(res.data); 
         const username = response.data.username;
-        displayMessages(REGISTRATION_SUCCESS);
+        displayMessage(REGISTRATION_SUCCESS);
     
     }).catch(err => {
         console.log(err);
-        displayMessages(err.response.data);
+        displayMessage(err.response.data);
     });
 }
-
-//.catch(err => {
-//console.log(err)
-//alert(err.response.data);
-//})}
-
 
 const valid = 'valid';
 
@@ -66,6 +48,9 @@ const isValidInput = (strUsername = valid, strPassword = valid,
 
     const testValue = (value, regex) => { 
 
+      valid && console.log(`Default value passed in.  Returning 'true'`);
+      if (valid) return true;
+      
       console.log(`Evaluating ${value}`);
       
       const evaluator = new RegExp(regex);
@@ -78,9 +63,12 @@ const isValidInput = (strUsername = valid, strPassword = valid,
     }
 
     const validInput = 
-      testValue(strUsername, VALID_USER_NAME) &&
+      testValue(strUsername, VALID_USER_NAME) && 
+      !console.log('Good username') &&
       testValue(strPassword, STRONG_PASSWORD) &&
-      testValue(strEmail, VALID_EMAIL);
+      !console.log('Good password.') &&
+      testValue(strEmail, VALID_EMAIL) &&
+      !console.log('Good email.');
     
     return validInput;
 
@@ -95,11 +83,11 @@ const blankInputs = (strUsername, strPassword, strEmail) => {
 function loginSubmitHandler(e) {
     e.preventDefault();
     
-    let username = document.querySelector('#login-username');
-    let password = document.querySelector('#login-password');
+    const username = document.querySelector('#login-username');
+    const password = document.querySelector('#login-password');
 
-    if (isValidInput(username.value, password.value)) {
-      displayErrors(BAD_LOGIN);
+    if (!isValidInput(username.value, password.value)) {
+      displayMessage(BAD_LOGIN);
       return;
     }
 
@@ -108,6 +96,7 @@ function loginSubmitHandler(e) {
         password: password.value
     }
 
+    console.log('Ready to log the user in.');
     login(bodyObj)
 
     username.value = ''
@@ -133,9 +122,9 @@ async function registerSubmitHandler(e) {
   const badInput = !isValidInput(username.value, password.value, email.value);
   const noInput = blankInputs(username.value, password.value, email.value)
   
-  const error =  noInput && displayErrors(BLANK_INFO) ||
-  badInput && displayErrors(BAD_REG) ||
-  badPasswordMatch && displayErrors(NEED_MATCHING_PASSWORDS);
+  const error =  noInput && displayMessage(BLANK_INFO) ||
+  badInput && displayMessage(BAD_REG) ||
+  badPasswordMatch && displayMessage(NEED_MATCHING_PASSWORDS);
 
   if (error) return;
 
@@ -153,11 +142,11 @@ async function registerSubmitHandler(e) {
   
 }
 
-const displayMessages = (message) => {
-  console.log(errorDisplay);
-  errorDisplay.classList.add('show');
-  errorDisplay.textContent = message;
-  console.log(errorDisplay.classList);
+const displayMessage = (message) => {
+  console.log(`We need to display a message: ${message}.`);
+  messageDisplay.classList.add('show');
+  messageDisplay.textContent = message;
+  console.log(messageDisplay.classList);
   return true;
 
 }
@@ -171,8 +160,8 @@ const clearFieldsHideErrors = () => {
 }
 
 const hideMessages = () => {
-  errorDisplay.classList.remove('show');
-  errorDisplay.textContent = '';
+  messageDisplay.classList.remove('show');
+  messageDisplay.textContent = '';
 }
 
 
@@ -185,7 +174,7 @@ function createUserCard(data) {
     <p class="email">Email: ${data.email}</p>`
 
     
-
+   
 
     userContainer.appendChild(userCard)
 }

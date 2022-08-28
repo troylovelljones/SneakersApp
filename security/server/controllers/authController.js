@@ -1,7 +1,9 @@
 const users = {};
-
+const SNEAKER_APP_DB = '../../../core/server/repositories/sneakers_app_database';
+const SNEAKER_USER_REPO = '../../../sneakers/server/repositories/sneaker_user_repository';
+const VALIDATORS = "../../../core/data-validation/validation";
 const bcrypt = require('bcrypt');
-const sequelize = require('../../../core/repositories/sneakers_app_database');
+const sequelize = require(SNEAKER_APP_DB);
 const path = require('path');
 const {
   
@@ -9,7 +11,7 @@ const {
   insertSneakerUser, 
   updateSneakerUser
 
-} = require('../../../core/repositories/sneaker_user_repository');
+} = require(SNEAKER_USER_REPO);
 
 const {
 
@@ -19,7 +21,7 @@ const {
   BAD_USER_INFO, 
   BAD_USERNAME_PASSWORD
 
-} = require("../../../core/data-validation/validation");
+} = require(VALIDATORS);
 const { Console } = console;
 const {log, dir, group, groupEnd} = new Console({colorMode: true, groupIndentation: 3,
   stdout: process.stdout, stderr: process.stderr});
@@ -27,8 +29,6 @@ const {log, dir, group, groupEnd} = new Console({colorMode: true, groupIndentati
 String.prototype.orNot = function (condition) {
   return condition ? this.toString() : `not ${this.toString()}`;
 };
-
-
 
 module.exports = {
 
