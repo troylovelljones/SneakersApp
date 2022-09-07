@@ -1,3 +1,4 @@
+
 const userContainer = document.querySelector('#user-info');
 const loginForm = document.querySelector('#login-form');
 const registerForm = document.querySelector('#register-form');
@@ -5,38 +6,99 @@ const messageDisplay = document.querySelector('.messages');
 
 const DEBUG = true;
 
-const DOMAIN_NAME = DEBUG && `http://localhost:` || `https://yoursneakercollection.com`;
-const SERVER_PORT = 4000;
+const loginPageLocation = document.location.toString();
+const serverUrlAndPort = loginPageLocation.replace('/login/','');
+const port = location.port;
+const appRegServerIpAddress = 'http://localhost';
+const appRegServerUrl = '/sneakers/app-registration-server/locate?servername';
+const appRegServerPort = 4500;
 
-const authUrl = '/api/v1/login';
-const regUrl = '/api/v1/register';
-const baseUrl = `${DOMAIN_NAME}`;
+let apiServerInfo = {};
+
+
+const getApiServerInfo = async () => {
+  const endPoint = appRegServerIpAddress + ':' + appRegServerPort + 
+    appRegServerUrl.replace('servername', 'Security Api Server');
+  console.log(endPoint);
+  try {
+    await axios.get(endPoint).then(updateApiServerInfo);
+  } catch (e) {
+    console.log(e.stack);
+    displayMessage(SERVER_UNAVAILABLE);
+  }
+}
+
+
+const updateApiServerInfo = (response) => {
+  let apiServerName = '', apiServerPort = 0, 
+      apiServerEndPoints = [], authApiUrl = '', 
+      regApiUrl = '';
+
+  const setAuthUrl = (endPoint) => authApiUrl = endPoint;
+  const setRegUrl = (endPoint) => regApiUrl = endPoint;
+  
+  apiServerName = response.idAddress;
+  apiServerPort = response.port;
+  apiServerEndPoints = response.endPoints;
+  
+  console.log(apiServerEndPoints);
+
+  for (endPoint of apiServerEndPoints) {
+    endPoint.contains('login') && setAuthUrl(endPoint);
+    endPoint.contains('register') && setRegUrl(endPoint);
+
+  }
+
+  return {
+    apiServerName, 
+    apiServerPort, 
+    apiServerEndPoints, 
+    authApiUrl, 
+    regApiUrl
+  }
+}
+  
+const noAvailableApiServer = () => {
+  return Object.keys(apiServerInfo).length === 0;
+}
+
+
 
 const login = body => {
   console.log('Posting login information.');  
-  axios.post(`${baseUrl + SERVER_PORT + authUrl}`, body).then( res => {
-  createUserCard(res.data);
-  console.log(res.data);
+  const endPoint = apiServerName + apiServerPort + authApiUrl;
+  console.log(endPoint);
+  axios.post(`${endPoint}`, body).then( response => {
+  console.log('replacing!!')
+  console.log(response.data);
+  //redirect on successful login
+  window.location.replace(response.data.url);
 }).catch(err => {
-  console.log(err);
-  displayMessage(err.response.data);
+    console.log(err);
+    console.log(err);
+    displayMessage(err.message);
 
 })}
-const register = async (body) => {
+
+const register = async (userInfo) => {
     
-  const REGISTRATION_SUCCESS = `You were successfully registered as ${username}!`
+  const username = userInfo.username;
+  const REGISTRATION_SUCCESS = `You were successfully registered as ${username}!`;
+  const endPoint = apiServerName + apiServerPort + regApiUrl;
 
   console.log(`register`);
-    console.log(body);
-    axios.post(`${baseUrl + SERVER_PORT + regUrl}`, body).then(res => {
-        console.log(res.data); 
-        const username = response.data.username;
-        displayMessage(REGISTRATION_SUCCESS);
+  console.log(userInfo);
+  console.log(endPoint)
+  axios.post(`${endPoint}`, userInfo).then(response => {
+    console.log(res.data); 
+    const username = response.data.username;
+    response.displayMessage(REGISTRATION_SUCCESS);
     
-    }).catch(err => {
-        console.log(err);
-        displayMessage(err.response.data);
-    });
+  }).catch(err => {
+      console.log('We got an error.');
+      console.log(err);
+      displayMessage(err.response.data.trim());
+  });
 }
 
 const valid = 'valid';
@@ -63,7 +125,7 @@ const isValidInput = (strUsername = valid, strPassword = valid,
     }
 
     const validInput = 
-      testValue(strUsername, VALID_USER_NAME) && 
+      //testValue(strUsername, VALID_USER) && 
       !console.log('Good username') &&
       testValue(strPassword, STRONG_PASSWORD) &&
       !console.log('Good password.') &&
@@ -77,14 +139,30 @@ const isValidInput = (strUsername = valid, strPassword = valid,
 const blankInputs = (strUsername, strPassword, strEmail) => {
   console.log(`Checking input fields for blanks...`);
   console.log(strUsername, strPassword, strEmail);
-  return !(strUsername && strPassword && strEmail);
+  return !(strUsername || strPassword || strEmail);
+}
+
+const getUserDataFromHtmlForm = (source) => {
+  return source === 'Registration-Form' && {
+    username: document.getElementById('#register-username'),
+    email: document.getElementById('#register-email'),
+    password: document.getElementById('#register-password'),
+    password2: document.getElementById('#register-password-2'),
+  } || 
+  {
+    username: document.getElementById('login-username'), 
+    password: document.getElementById('login-password')
+  }
 }
 
 function loginSubmitHandler(e) {
     e.preventDefault();
     
-    const username = document.querySelector('#login-username');
-    const password = document.querySelector('#login-password');
+    if (noAvailableApiServer()) {
+      displayMessage(NO_API_SERVER);
+      return;
+    }
+    const {username, password}  = getUserDataFromHtmlForm()
 
     if (!isValidInput(username.value, password.value)) {
       displayMessage(BAD_LOGIN);
@@ -103,13 +181,34 @@ function loginSubmitHandler(e) {
     password.value = ''
 }
 
-async function registerSubmitHandler(e) {
-  e.preventDefault()
+const checkForInvalidInput = (username, password, password2, email) => {
+  
+  const badPasswordMatch = password.value !== password2.value;
+  const badInput = !isValidInput(username.value, password.value, email.value);
+  const noInput = blankInputs(username.value, password.value, email.value)
+  const error =  noInput && 
+    displayMessage(BLANK_INFO) ||
+    badInput && displayMessage(BAD_REG) ||
+    badPasswordMatch && 
+    displayMessage(NEED_MATCHING_PASSWORDS);
 
-  let username = document.querySelector('#register-username');
-  let email = document.querySelector('#register-email');
-  let password = document.querySelector('#register-password');
-  let password2 = document.querySelector('#register-password-2');
+  return error
+}
+
+async function registerSubmitHandler(e) {
+  e.preventDefault();
+  
+  if (noAvailableApiServer()) {
+    displayMessage(NO_API_SERVER);
+    return;
+  }
+  
+  if (!isValidInput(username.value, password.value)) {
+    displayMessage(BAD_LOGIN);
+    return;
+  }
+
+  const {username, email, password, password2} = getUserDataFromHtmlForm('Registration-Form');
 
   console.log(username, password, email);
   console.log(`Username: ` + 
@@ -118,13 +217,7 @@ async function registerSubmitHandler(e) {
     ` ${password.value}` +
     ` email: ${email.value}`);
 
-  const badPasswordMatch = password.value !== password2.value;
-  const badInput = !isValidInput(username.value, password.value, email.value);
-  const noInput = blankInputs(username.value, password.value, email.value)
-  
-  const error =  noInput && displayMessage(BLANK_INFO) ||
-  badInput && displayMessage(BAD_REG) ||
-  badPasswordMatch && displayMessage(NEED_MATCHING_PASSWORDS);
+  const error = checkForInvalidInput(username, password, password2, email)
 
   if (error) return;
 
@@ -146,7 +239,6 @@ const displayMessage = (message) => {
   console.log(`We need to display a message: ${message}.`);
   messageDisplay.classList.add('show');
   messageDisplay.textContent = message;
-  console.log(messageDisplay.classList);
   return true;
 
 }
@@ -165,19 +257,6 @@ const hideMessages = () => {
 }
 
 
-function createUserCard(data) {
-    userContainer.innerHTML = ''
-    const userCard = document.createElement('div')
-    userCard.classList.add('user-card')
-
-    userCard.innerHTML = `<p class="username">User Name: ${data.username}</p>
-    <p class="email">Email: ${data.email}</p>`
-
-    
-   
-
-    userContainer.appendChild(userCard)
-}
-
-loginForm.addEventListener('submit', loginSubmitHandler)
-registerForm.addEventListener('submit', registerSubmitHandler)
+loginForm.addEventListener('submit', loginSubmitHandler);
+registerForm.addEventListener('submit', registerSubmitHandler);
+apiServerInfo = getApiServerInfo();

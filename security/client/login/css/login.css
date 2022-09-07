@@ -86,6 +86,7 @@ main {
   justify-content: center;
   width: 100%;
   height: 100%;
+  
 }
 
 form {
@@ -101,6 +102,9 @@ form {
 
 .messages {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items:flex-start;
   text-align:left;
   background-color: transparent;
   border: none;
@@ -162,6 +166,9 @@ input[type='text'] {
   color: #232323;
   padding-left: 5px;
   background-color: snow;
+  font-size: 18px;
+  outline: none;;
+ 
 }
 
 input[type='password'] {
@@ -172,7 +179,22 @@ input[type='password'] {
   color: #232323;
   background-color: snow;
   padding-left: 5px;
+  font-size: 18px;;
+  outline: none;
+  
 }
+  
+input:autofill {
+    background: #fff;
+}
+  
+  
+
+
+input: autofill {
+  background: #fff;
+}
+
 
 #user-container {
   display: flex;
@@ -196,10 +218,10 @@ input[type='password'] {
 .username {
   font-size: 18px;
   margin: 5px 0;
+  
 }
 
 .default-text {
-  font-size: 15px;
   margin: 5px 0;
 }
 

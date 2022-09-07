@@ -1,15 +1,11 @@
-const users = {};
-const SNEAKER_APP_DB = '../../../core/server/repositories/sneakers_app_database';
 const SNEAKER_USER_REPO = '../../../sneakers/server/repositories/sneaker_user_repository';
 const VALIDATORS = "../../../core/data-validation/validation";
 const bcrypt = require('bcrypt');
-const sequelize = require(SNEAKER_APP_DB);
-const path = require('path');
 const {
   
   getSneakerUserByUserName, 
   insertSneakerUser, 
-  updateSneakerUser
+  
 
 } = require(SNEAKER_USER_REPO);
 
@@ -30,12 +26,13 @@ String.prototype.orNot = function (condition) {
   return condition ? this.toString() : `not ${this.toString()}`;
 };
 
+const SNEAKER_APP_URL = 'http://localhost:';
+const SNEAKER_APP_PORT = 4050
+
 module.exports = {
 
 
     login: async (req, res) => {
-      
-      copyUser = (user) => {return {...user}};
       
       const { username, password } = req.body;
 
@@ -70,12 +67,21 @@ module.exports = {
 
       const sanitizedUserRecord = {};
       sanitizedUserRecord.username = username;
-      sanitizedUserRecord.lastLogIn = sneakerUser.last_login_at;
-      res.status(200).send(sanitizedUserRecord); 
+      sanitizedUserRecord.lastLogIn = sneakerUser.last_login_at;      
+      console.log(`Redirecting to ${SNEAKER_APP_URL + SNEAKER_APP_PORT + '/'}`);
+      
+      //res.status(200).send(sanitizedUserRecord); 
           
       groupEnd();
       log(`Credential verification for ${username} was ${'successful'.orNot(sanitizedUserRecord)}`
           + ` at ${new Date()}`);
+      
+      
+      //res.redirect(301, "www.yahoo.com");
+
+      console.log('sending you to 4050!!')
+     
+      res.status(200).send({url: SNEAKER_APP_URL + SNEAKER_APP_PORT });
 
     },
     

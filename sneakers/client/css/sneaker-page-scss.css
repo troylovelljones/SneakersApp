@@ -1,0 +1,36 @@
+main {
+    font-size:12px;
+    
+}
+    
+
+.img-container{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;
+    min-width: 300px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+}
+
+.mix-blend-mode{
+    mix-blend-mode: multiply;
+}
+
+.layerd{
+    position:relative;
+}
+
+.layerd::after{
+    content:" ";
+    position:absolute;
+    right:0;
+    bottom:0;
+    left:0;
+    background-color:rgba(4,4,4,.1875)
+}

@@ -5,27 +5,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../css/sneakers-page.css" />
+    <link rel="stylesheet" href="../css/sneaker-page-scss.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600&display=swap"
       rel="stylesheet"
     />
-    <title>Latest Hotness</title>
+    <title>Shoe Search</title>
   </head>
   <body>
     <header>
-      <h1>Latest Hotness</h1>
+      <div id = "page-title">
+          <h1>Search the Coolest Styles on the Web</h1>
+      </div>
+      <div class = "left-right-container">
+          <div class="left">
+              <div id="your-closet">Your Closet</div>
+          </div>
+          <div class = "right">
+              <div id = "search-bar">
+                  <label for="search">Search:</label>
+                  <input type="text" id="sneaker-search" name="search" placeholder = "the latest jordans" class="invalid-text-input">
+              </div>     
+          </div>
+      </div>    
     </header>
       <main>
-        <section id="top"></section>
-        <section id="bottom">
-          <div id="footer">
-            <footer id="bottom"></footer>
-          </div>
-        </section>
+        <section id="top">
+          <div class="triangle-down"></div>
+
+          <div id="notification-window"></div>
+        </section>    <!----------end top section--------> 
       </main>
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <main></main>
+      <script src="../js/sneakers.js"></script>
+      
   </body>
 </html>

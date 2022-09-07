@@ -1,8 +1,8 @@
 
-const SNEAKER_APP_DB = '../../../core/server/repositories/sneakers_app_database';
-const POSTGRESQL_UTILS = '../../../core/server/repositories/utils/postgresql_utilities'
+const SNEAKER_APP_DB = '../../../core/server/repository/sneakers_app_database';
+const POSTGRESQL_UTILS = '../../../core/server/repository/utils/postgresql_utilities'
 const sequelize = require(SNEAKER_APP_DB);
-const {createSelectStatement, createInsertStatement} = require(POSTGRESQL_UTILS);
+const {createSqlSelectStatement, createSqlInsertStatement} = require(POSTGRESQL_UTILS);
 const {QueryTypes} = require("sequelize");
 const showSql = true;
 const TEST = true;
@@ -11,7 +11,7 @@ const TEST = true;
 module.exports = {
 
    getSneakerUserById : async (id) => {
-        const result = await sequelize.query(createSelectStatement('users', ['username', 'password', 
+        const result = await sequelize.query(createSqlSelectStatement('users', ['username', 'password', 
             'profile_image', 'last_login_at']).
             where('id').
             isEqualTo(id).get(),
@@ -22,7 +22,7 @@ module.exports = {
     },
 
     getSneakerUserByUserName: async (username) => {
-        const selectStatement = createSelectStatement('users', ['username', 'password', 
+        const selectStatement = createSqlSelectStatement('users', ['username', 'password', 
             'profile_image', 'last_login_at']).
         where('username').
         isEqualTo(username).get();
@@ -41,7 +41,7 @@ module.exports = {
         console.log(`User record: `.gray);
         console.log(user);
         const insertRecord = 
-            createInsertStatement('users', user, //include timestamps
+            createSqlInsertStatement('users', user, //include timestamps
                 {mappedProperties: {email: 'email_address'}, timestamps: {defaultTimestampFields: true}}); //map email & password fields
         showSql && console.log(`Insert record: `.magenta + `${insertRecord}`.green.italic.bold);
         const result = await sequelize.query(insertRecord, {type: QueryTypes.INSERT});
@@ -52,7 +52,7 @@ module.exports = {
     updateSneakerUser: async (user) => {
         const {username, id, email, password: encryptedPassword} = user;
         const updateStatement = 
-            createUpdateStatement('users', 
+            createSqlUpdateStatement('users', 
                 {username, email, password, emailaddress},
                 {mappedProperties: {email: 'email_address'}}, 
                 {serverTimestamps: true}).

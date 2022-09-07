@@ -1,16 +1,5 @@
-const sequelize = require('./sneakers_app_database'); 
-const {constructInsertStatement, constructUpdateStatement} = require("./postgresql_utilities");
-
-const {
-        getStringColumnType, 
-        getIntegerColumnType, 
-        getDecimalColumnType, 
-        getDateColumnType,
-     
-    
-} = require('./repository_utilities'); 
-const { Error } = require('sequelize');
-const e = require('cors');
+const sequelize = require('../../../core/server/repositories/sneakers_app_database'); 
+const {constructInsertStatement, constructUpdateStatement} = require("../../../core/server/repositories/utils/postgresql_utilities");
 
 const insertSneakers = async (tableName, records) => {
     
@@ -44,24 +33,8 @@ const updateSneakers = async (tableName, records, primaryKey) => {
     
 }
 
-const SneakerImport = sequelize.define(`sneakers_import`, {
-    brand: getStringColumnType('brand_id'),
-    originalReleaseYearId: getIntegerColumnType('original_release_year_id'),
-    originalRetailPrice: getDecimalColumnType('original_retail_price'),
-    imageLinksUrl: getStringColumnType('image_link_url'),
-    thumbNail: getStringColumnType('thumbnail_image'),
-    goatProductId: getStringColumnType('goat_product_id', 100),
-    description: getStringColumnType('description'),
-    releaseDate: getDateColumnType('release_date'),
-    styleId: getStringColumnType('style_id', 100),
-    shoeName: getStringColumnType('sneaker_name'),
-    colorway: getStringColumnType('colorway', 100)
-    },{ timestamps: true,
-        createdAt: "created_at", // alias createdAt as created_date
-        updatedAt: "updated_at",
-        tableName: 'sneakers_import'});
 
-    
+const SneakerImport = {name: 'SneakerImport'};
 SneakerImport.bulkCreate = (records) => insertSneakers(`sneakers_import`, records);
  
 
