@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "string": "^3.3.3",
     "vhost": "^3.0.2"
   }
 }

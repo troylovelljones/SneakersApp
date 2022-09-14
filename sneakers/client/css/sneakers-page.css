@@ -2,17 +2,31 @@
   margin: 0;
   padding: 0;
   font-family: 'League Spartan';
-  background-color: #fafafa;
+  /*background-color: #fafafa;*/
  
 }
 
-body {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+a:link { /* Essentially means a[href], or that the link actually goes somewhere */
+  color: black;
+}
+a:visited {
+  color: purple;
+}
+a:hover {
+  color: green;
+}
+a:active {
+  color: red;
 }
 
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+
+}
 
 header {
   display: flex; 
@@ -27,13 +41,21 @@ header {
   top: 0;
 }
 
-
-
 h1 {
   font-size: 2.2em;
   background-color: white;
 }
 
+footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+img {
+  width: 175px;
+}
 
 #page-title {
   display: flex;
@@ -56,8 +78,6 @@ h1 {
   justify-content: center;
   min-height: 50px;
 
- 
-
   }
 }
 
@@ -73,6 +93,10 @@ h1 {
 }
 
 div.left-right-container {
+  display: flex;
+  flex-direction: row;
+  justify-content:center;
+  align-items: flex-end;
   margin-bottom: 10px;
   width: 100%;
   background-color: #fff;
@@ -93,28 +117,32 @@ header div.right {
 
 header div.left {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: flex-start;
-  align-items:flex-start;
+  align-items:flex-end;
   min-width: 50%;
   min-height: 100%;
   background-color: #fff;
+ 
 
 }
 
-#your-closet {
+.left-menu-text {
   margin-left: 36px;
-  font-size: 30px;
+  font-size: 20px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
-input {
+input.search-input {
   height: 25px;
   width: 250px;
   margin-left: 10px;
   font-size: 20px;
-  margin-right: 20px;
   border: 1px solid black;
-  padding: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left:5px;
   
 }
 
@@ -127,6 +155,15 @@ input {
   min-height: 100%;
   background-color: #fff;
 
+
+}
+
+#search-button {
+  height: 40px;
+  width: 100px;
+  margin-right: 20px;
+  margin-left: 15px;
+  font-size: 20px;
 }
 
 main {
@@ -191,6 +228,7 @@ main #top {
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  margin-top: 100px;
   border: solid grey .25px;
   color: black;
 
@@ -223,6 +261,13 @@ section.sneakers {
 
 }
 
+.ico-sneaker-closet {
+  display: inline-block;
+  width: 36px; height: 36px;
+  background-image: url('../icons/sneaker-closet.png');
+  background-repeat: no-repeat;
+}
+
 div.shoe {
   display: flex;
   flex-direction: column;
@@ -234,14 +279,13 @@ div.shoe {
   border-radius: 10%
 }
 
-
-body {
-  height: 100vh;
+div.favorites {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  flex-direction: row;
+  justify-content: right;
   align-items: center;
-
+  padding-right: 100px;
+  width: 100%;
 }
 
 div.price {
@@ -348,20 +392,11 @@ span.price-title::after {
   height: 50px;
 }
 
-footer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
 
-img {
-  width: 175px;
-}
-
-.invalid-search-input {
+.invalid-search-edit {
   color: red;
 }
+
 
 
 

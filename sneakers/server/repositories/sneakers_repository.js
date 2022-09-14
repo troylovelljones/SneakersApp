@@ -1,7 +1,5 @@
-const SNEAKER_APP_DB = '../../../core/server/repositories/sneakers_app_database';
-const POSTGRESQL_UTILS = '../../../core/server/repositories/utils/postgresql_utilities'
-const sequelize = require(SNEAKER_APP_DB);
-const {createSqlSelectStatement} = require(POSTGRESQL_UTILS);
+const db = require('../../../core/server/repository/sneakers_app_database');
+const {createSqlSelectStatement} = require('../../../core/server/repository/utils/postgresql_utilities');
 const {QueryTypes} = require("sequelize");
 const showResultsInConsole = true;
 const TEST = true;
@@ -21,11 +19,6 @@ const jordansQuery = createBaseSneakerQuery().
     orderBy('sneaker_name');
 
 const sneakerQuery = createBaseSneakerQuery();
-    
-
-const alwaysReturnTrue = (value) => {
-    return true;
-}
 
 const sneakers = {
     getSneakers: async (limit, options) => {
@@ -40,25 +33,22 @@ const sneakers = {
             limit(limit).
             get() || sneakerQuery.get();
 
-      
-        showResultsInConsole && console.log(`Executing query `.cyan) && alwaysReturnTrue(console.log(sqlSelectStatement).magenta);
-
-        const results = await sequelize.query(sqlSelectStatement, {type: QueryTypes.SELECT});
-
-        console.log(`Returned ` + `${results.length}`.green + `records from the query`);
-
+        showResultsInConsole && 
+            console.log(`Executing query `.cyan) && 
+            !console.log(sqlSelectStatement).magenta;
+        const results = await db.query(sqlSelectStatement, {type: QueryTypes.SELECT});
+        console.log(`Returned ` + `${results.length}`.green + ` records from the query`);
         return results;   
         
     },
 
     getJordans: async(limit) => {
         showResultsInConsole && console.log('Getting Jordans');
-        //showResultsInConsole && console.log('SQL to get sneakers') && alwaysReturnTrue(console.log(sneakerSelect.reset().get()));
-        const results = await sequelize.query(jordansQuery.
+        const results = await db.query(jordansQuery.
             limit(limit).
             get(),
             {type: QueryTypes.SELECT});
-        console.log(`Returned ` + `${results.length}`.green + `records from the query`);
+        console.log(`Returned ` + `${results.length}`.green + ` records from the query`);
         return results;
          
     }

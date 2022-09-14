@@ -1,4 +1,4 @@
-const sequelize = require('../../../core/server/repositories/sneakers_app_database');
+const sequelize = require('../../../core/server/repository/sneakers_app_database');
 const COMMA = `,`;
 const LOCK_TABLE = `LOCK TABLE resellers_import IN EXCLUSIVE MODE; `;
 const INSERT_RECORD = `INSERT INTO resellers_import (id, reseller_name, reseller_url, created_at, updated_at) ` +

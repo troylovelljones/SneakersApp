@@ -1,12 +1,10 @@
-const sequelize = require('../../../core/server/repositories/sneakers_app_database'); 
-const {constructInsertStatement, constructUpdateStatement} = require("../../../core/server/repositories/utils/postgresql_utilities");
+const sequelize = require('../../../core/server/repository/sneakers_app_database'); 
+const {constructInsertStatement, constructUpdateStatement} = require('../../../core/server/repository/utils/postgresql_utilities');
 
 const insertSneakers = async (tableName, records) => {
     
     const timestamp = {createdAt: 'created_at', updatedAt: 'updated_at'};
-
     console.log(`${records.length} record(s) to insert into ${tableName}`.magenta);
-    
     const insertStatement = constructInsertStatement(tableName, records, timestamp, 
         {
             mappedProperties: {imageLinks: 'image_link_url', thumbnail: 'thumbnail_image',
@@ -24,18 +22,8 @@ const insertSneakers = async (tableName, records) => {
     }
     console.log(`Sneaker import successful`.green);
 
-
-
 }
-const updateSneakers = async (tableName, records, primaryKey) => {
-    const updateStatement = constructUpdateStatement(tableName, records, primaryKey);
-    await sequelize.query(updateStatement, {type: sequelize.QueryTypes.UPDATE_STATEMENT})
-    
-}
-
-
 const SneakerImport = {name: 'SneakerImport'};
-SneakerImport.bulkCreate = (records) => insertSneakers(`sneakers_import`, records);
- 
+SneakerImport.bulkCreate = (records) => insertSneakers(`sneakers_import`, records) 
 
 module.exports = SneakerImport;

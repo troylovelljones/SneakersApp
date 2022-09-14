@@ -38,14 +38,18 @@ const getAppRegistryController = async () => {
         },
 
         locate: async (req, res) => {
+            console.log(req);
             const serverName = req.query.servername;
             console.log(`Locating application ${serverName}.`);
             try {
                 
-                result = await AppRegistry.locateEntry(serverName);
+                const result = await AppRegistry.locateEntry(serverName);
+                console.log(result);
                 console.log(`Application ${serverName} found.`.green);
                 res.status(200).send(result);
             } catch (e) {
+                e.stack && console.log(e.stack);
+                console.log('How did we end up here?');
                 console.log(`Could not locate ${serverName}.`.red);
                 res.status(400).send(`Could not locate ${serverName}.`);
             }

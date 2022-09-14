@@ -7,21 +7,21 @@ const NO_API_SERVER = 'The server is temporarily unavailable.  Please try again 
 const STRONG_PASSWORD =  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
 const VALID_EMAIL =  /^(.+)@(.+)$/;
 const VALID_USER =  /^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
-
 const VALID_INPUT = /^(?=[a-zA-Z0-9._]{1,}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
-
 const REG_ERROR = 'An error occured during registration.  Please try again.';
-
 const BAD_LOGIN = 'Either the username or password was invalid!';
 
 const BAD_USER_INFO = `The registration information supplied was invalid.  Passwords must be at least` +
     ' 10 characters long with one uppercase letter, one number and one special character.  ' +
     'Usernames cannot contain special characters. Email addresses must be entered as "address@domain"app.endPoints = app.getRoutingInformation();';
 
-const BAD_USERNAME_PASSWORD = 'Either username or password was incorrect.';
-
+const BAD_USERNAME_PASSWORD = 'Unable to validate your username and password.  Please try again.';
 const USERNAME_EXISTS = `User Name exists. Please choose a different user name!`;
 const SERVER_UNAVAILABLE = `The server is currently unavailabe.  Please try again later.`;
+
+const throwError = (message) => {
+    throw new Error(message);
+}
 
 //remove all unprintable characters from the string
 const sanitizeString = (str) => {
@@ -41,7 +41,8 @@ try {
 
             VALID_INPUT: /^(?=[a-zA-Z0-9._]{1,}$)(?!.*[_.]{2})[^_.].*[^_.]$/,
 
-            REG_ERROR: 'An error occured during registration.  Please try again.',
+            REG_ERROR: 'An error occured during registration.  Please make sure you do not have an ' +
+                'active account.',
 
             BAD_LOGIN: 'Either the username or password was invalid!',
 

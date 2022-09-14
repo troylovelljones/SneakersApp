@@ -14,7 +14,6 @@ const APP_NAME =  process.env.APP_NAME || 'App Registration Server';
 const SERVER_IP_ADDRESS =  process.env.SERVER_IP_ADDRESS;
 const fakeIpAddress = 'http://localhost';
 const registrationServerUrl = fakeIpAddress + ':' + PORT + '/sneakers/app-registration-server/register';
-
 const TIMEOUT_MS = 2000;
 const NUM_REGISTRATION_RETRIES = 4;
 
@@ -22,11 +21,9 @@ const throwError = (message) => {
     throw new Error(message.red);
 }
 
-output.error && !console.log(output) && throwError(output.error);
-
-
-
 const afterLogin = () => console.log(`Server up on port ${PORT}`.green);
+
+output.error && !console.log(output) && throwError(output.error);
 
 console.log('Launching server.'.blue);
 
@@ -37,14 +34,11 @@ const processResult = (result) => {
 }
 
 let retries = 0;
-
 const registerApplication = async () => {
     const retryRegistration = async () => {
         const result = await register(registrationServerUrl);
-        !result && 
-        retries < NUM_REGISTRATION_RETRIES && 
-        setTimeout(retryRegistration, TIMEOUT_MS) && 
-        ++retries || processResult(result);
+        !result && ++retries < NUM_REGISTRATION_RETRIES ?
+            setTimeout(retryRegistration, TIMEOUT_MS) : processResult(result);
     }
     
     try {

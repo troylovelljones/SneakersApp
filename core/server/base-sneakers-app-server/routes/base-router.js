@@ -7,11 +7,12 @@ const express = require(`express`);
 const router = express.Router();
 
 //the default controller makes a get request to the 
-//api/v1/healthcheck route make sure things are configured correctly
-const {test, kill} = baseController;
+//admin/healthcheck route make sure things are configured correctly
+const {test, kill, update} = baseController;
 
-router.route('admin/health').get(test);
-router.route('admin/kill').get(kill);
+router.route('/admin/healthcheck').get(test);
+router.route('/admin/kill').get(kill);
+router.route('/admin/update').put(update);
 
 //export the default router
 module.exports = router;

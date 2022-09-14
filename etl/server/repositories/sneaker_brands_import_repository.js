@@ -1,4 +1,4 @@
-const sequelize = require('../../../core/server/repositories/sneakers_app_database');
+const sequelize = require('../../../core/server/repository/sneakers_app_database');
 
 const COMMA = `,`;
 const LOCK_TABLE = `LOCK TABLE sneaker_brands_import IN EXCLUSIVE MODE; `;

@@ -1,5 +1,4 @@
 
-const {startExpressApplicationServer} = require('./basic-express-server/expressAppServer');
 const colors = require("colors");
 const output = require('dotenv').config();
 const path = require('path');
@@ -19,8 +18,6 @@ if (output) {
 
 const getMainPort = () => process.env.SERVER_PORT;
 
-startExpressApplicationServer(mainApp,
-    {name: 'Main-Server', port: process.env.SERVER_PORT, fallthrough: false}, true);
 
 //mainApp.addRouter(router);
 
@@ -38,18 +35,7 @@ mainApp.mountSubApp = (subApp, url, usingVhost) => {
     
 }
 
-const securityApp = require('../../security/server/security-app-server');
-securityApp.appName = 'Security Sub-App';
-const securityApi = require('../../security/server/security-api-server');
-securityApi.appName = 'Security Api Sub-App';
-const sneakersApp = require('../../sneakers/server/sneakers_app_server');
-sneakersApp.appName = 'Sneakers Sub-App';
-const sneakersApi = require('../../sneakers/server/sneakers_api_server');
-sneakersApi.appName = 'Sneakers Api Sub-App';
-mainApp.mountSubApp(securityApp,'/app-server');
-//mainApp.mountSubApp(securityApi, '/api-server/security');
-//mainApp.mountSubApp(sneakersApp, '/app-server/sneakers');
-//mainApp.mountSubApp(sneakersApi,'/api-server/sneakers');
+
 
 
   

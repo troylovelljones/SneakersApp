@@ -2,7 +2,7 @@
 const userContainer = document.querySelector('#user-info');
 const loginForm = document.querySelector('#login-form');
 const registerForm = document.querySelector('#register-form');
-const messageDisplay = document.querySelector('.messages');
+const notificationWindow = document.getElementById('notification-window');
 
 const DEBUG = true;
 
@@ -10,94 +10,114 @@ const loginPageLocation = document.location.toString();
 const serverUrlAndPort = loginPageLocation.replace('/login/','');
 const port = location.port;
 const appRegServerIpAddress = 'http://localhost';
-const appRegServerUrl = '/sneakers/app-registration-server/locate?servername';
+const locateUrl = '/locate?servername=%';
 const appRegServerPort = 4500;
+const fakeIpAddress = "http://localhost";
 
-let apiServerInfo = {};
+const apiServerInfo = {};
 
 
 const getApiServerInfo = async () => {
-  const endPoint = appRegServerIpAddress + ':' + appRegServerPort + 
-    appRegServerUrl.replace('servername', 'Security Api Server');
+  const allCookies = document.cookie;
+  const registrationServerLink = decodeURIComponent(allCookies.
+    split('; ').
+    find((row) => row.startsWith('registryUrl'))?.
+    split('=')[1]);
+  console.log(`Registration Server link ${registrationServerLink}`);
+  const endPoint = registrationServerLink + locateUrl.replace('%', 'Security Api Server');
+  !endPoint && throwError('Unable to locate registry server!');
   console.log(endPoint);
   try {
     await axios.get(endPoint).then(updateApiServerInfo);
+    console.log('answer received.');
+    hideMessages();
+    return;
   } catch (e) {
-    console.log(e.stack);
+    e && console.log(e.stack);
     displayMessage(SERVER_UNAVAILABLE);
   }
 }
 
 
 const updateApiServerInfo = (response) => {
-  let apiServerName = '', apiServerPort = 0, 
-      apiServerEndPoints = [], authApiUrl = '', 
-      regApiUrl = '';
 
-  const setAuthUrl = (endPoint) => authApiUrl = endPoint;
-  const setRegUrl = (endPoint) => regApiUrl = endPoint;
-  
-  apiServerName = response.idAddress;
-  apiServerPort = response.port;
-  apiServerEndPoints = response.endPoints;
+  console.log(response);
+  const apiServerIpAddress = response.data.ipAddress;
+  const apiServerPort = response.data.port;
+  const apiServerEndPoints = response.data.endPoints;
   
   console.log(apiServerEndPoints);
-
-  for (endPoint of apiServerEndPoints) {
-    endPoint.contains('login') && setAuthUrl(endPoint);
-    endPoint.contains('register') && setRegUrl(endPoint);
+  let authUrl = regUrl = '';
+  for (const endPoint of apiServerEndPoints) {
+    if (endPoint.includes('login'))
+      authUrl = endPoint;
+    if (endPoint.includes('register'))
+      regUrl = endPoint;
 
   }
 
-  return {
-    apiServerName, 
-    apiServerPort, 
-    apiServerEndPoints, 
-    authApiUrl, 
-    regApiUrl
-  }
+  console.log(authUrl, regUrl);
+
+  apiServerInfo.ipAddress = apiServerIpAddress;
+  apiServerInfo.port = apiServerPort; 
+  apiServerInfo.authUrl = authUrl
+  apiServerInfo.regUrl = regUrl;
+ 
+  
 }
   
 const noAvailableApiServer = () => {
   return Object.keys(apiServerInfo).length === 0;
 }
 
+const displayMessage = (message) => {
+  console.log(`We need to display a message: ${message}.`);
+  notificationWindow.classList.add('show');
+  notificationWindow.textContent = message;
+  return true;
 
+}
 
 const login = body => {
   console.log('Posting login information.');  
-  const endPoint = apiServerName + apiServerPort + authApiUrl;
+  console.log(`Real ip address = ${apiServerInfo.ipAddress}.`);
+  console.log(`Using fake ip address for testing: ${fakeIpAddress}.`);
+  const endPoint = 
+    fakeIpAddress + ':' + 
+    apiServerInfo.port + 
+    apiServerInfo.authUrl;
   console.log(endPoint);
   axios.post(`${endPoint}`, body).then( response => {
-  console.log('replacing!!')
   console.log(response.data);
   //redirect on successful login
   window.location.replace(response.data.url);
 }).catch(err => {
-    console.log(err);
-    console.log(err);
-    displayMessage(err.message);
+    console.log(err.message);
+    displayMessage('There was a problem accessing the server.  Please try again.');
 
 })}
 
-const register = async (userInfo) => {
+const register = userInfo => {
     
   const username = userInfo.username;
+  const emailAddress = userInfo.emailAddress
   const REGISTRATION_SUCCESS = `You were successfully registered as ${username}!`;
-  const endPoint = apiServerName + apiServerPort + regApiUrl;
+  console.log(`Real ip address = ${apiServerInfo.ipAddress}.`);
+  console.log(`Using fake ip address for testing: ${fakeIpAddress}.`);
+  const endPoint = fakeIpAddress + ':' + apiServerInfo.port + apiServerInfo.regUrl;
 
   console.log(`register`);
   console.log(userInfo);
   console.log(endPoint)
   axios.post(`${endPoint}`, userInfo).then(response => {
-    console.log(res.data); 
-    const username = response.data.username;
-    response.displayMessage(REGISTRATION_SUCCESS);
+    console.log('answer');
+    console.log(response.data); 
+    displayMessage(REGISTRATION_SUCCESS);
     
   }).catch(err => {
       console.log('We got an error.');
       console.log(err);
-      displayMessage(err.response.data.trim());
+      displayMessage(err.response.data);
   });
 }
 
@@ -112,15 +132,12 @@ const isValidInput = (strUsername = valid, strPassword = valid,
 
       valid && console.log(`Default value passed in.  Returning 'true'`);
       if (valid) return true;
-      
       console.log(`Evaluating ${value}`);
-      
       const evaluator = new RegExp(regex);
-  
-     (evaluator.test(value) && !console.log(`${value} is valid!`)) ||
+      (evaluator.test(value) && !console.log(`${value} is valid!`)) ||
         console.log(`${value} is not valid!`)
       
-      return value === valid || evaluator.test(value);
+        return value === valid || evaluator.test(value);
 
     }
 
@@ -143,11 +160,12 @@ const blankInputs = (strUsername, strPassword, strEmail) => {
 }
 
 const getUserDataFromHtmlForm = (source) => {
+
   return source === 'Registration-Form' && {
-    username: document.getElementById('#register-username'),
-    email: document.getElementById('#register-email'),
-    password: document.getElementById('#register-password'),
-    password2: document.getElementById('#register-password-2'),
+    username: document.getElementById('register-username'),
+    email: document.getElementById('register-email'),
+    password: document.getElementById('register-password'),
+    password2: document.getElementById('register-password-2'),
   } || 
   {
     username: document.getElementById('login-username'), 
@@ -162,7 +180,7 @@ function loginSubmitHandler(e) {
       displayMessage(NO_API_SERVER);
       return;
     }
-    const {username, password}  = getUserDataFromHtmlForm()
+    const {username, password}  = getUserDataFromHtmlForm();
 
     if (!isValidInput(username.value, password.value)) {
       displayMessage(BAD_LOGIN);
@@ -203,12 +221,14 @@ async function registerSubmitHandler(e) {
     return;
   }
   
+  const {username, email, password, password2} = getUserDataFromHtmlForm('Registration-Form');
+
   if (!isValidInput(username.value, password.value)) {
     displayMessage(BAD_LOGIN);
     return;
   }
 
-  const {username, email, password, password2} = getUserDataFromHtmlForm('Registration-Form');
+ 
 
   console.log(username, password, email);
   console.log(`Username: ` + 
@@ -235,28 +255,51 @@ async function registerSubmitHandler(e) {
   
 }
 
-const displayMessage = (message) => {
-  console.log(`We need to display a message: ${message}.`);
-  messageDisplay.classList.add('show');
-  messageDisplay.textContent = message;
-  return true;
-
+const clearFields = () => {
+  document.getElementById('register-username'),placeholder = 'username';
+  document.getElementById('username'),placeholder = 'username';
+  document.getElementById('register-email').value = '';
+  document.getElementById('register-email').placeholder = 'email';
+  document.getElementById('register-password').value = '';
+  document.getElementById('register-password').value = 'password';
+  document.getElementById('register-password-2').value = '';
+  document.getElementById('register-password-2').placeholder = 'confirm password';
+  document.getElementById('login-password').placeholder = 'password';
 }
-
 const clearFieldsHideErrors = () => {
-  username.value = '';
-  email.value = '';
-  password.value = '';
-  password2.value = '';
+  clearFields();
   hideMessages();
 }
 
 const hideMessages = () => {
-  messageDisplay.classList.remove('show');
-  messageDisplay.textContent = '';
+  console.log('removing message window from screen.');
+  notificationWindow.classList.remove('show');
+  notificationWindow.textContent = '';
 }
 
+const locateServer = async (serverName) => {
+  
+  const allCookies = document.cookie;
+  const apiServerUrl = decodeURIComponent(allCookies.
+    split('; ').
+    find((row) => row.startsWith('registryUrl'))?.
+    split('=')[1]);
 
+    console.log(apiServerUrl);
+    try {
+      const response = await axios.get(`${apiServerUrl}\locate?servername=${serverName}`, body);  
+      console.log(response);
+      return processRouteData(response.data) 
+    } catch (e) {
+        logError(e);
+        e.errorLogged = true;
+        showMessage('Server unavailable.  Please try to refresh the page.');
+        throw e;
+    }
+    
+}
+
+clearFields();
 loginForm.addEventListener('submit', loginSubmitHandler);
 registerForm.addEventListener('submit', registerSubmitHandler);
-apiServerInfo = getApiServerInfo();
+getApiServerInfo();

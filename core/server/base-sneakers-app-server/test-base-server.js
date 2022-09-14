@@ -1,4 +1,4 @@
-const {startServer} = require('./base-server');
+const {initializeServer} = require('./base-server');
 const express = require('express');
 const app = express();
 
@@ -16,4 +16,6 @@ const options = {fallthrough: true,
     registrationServerUrl
 };
 
-startServer(app, options);
+initializeServer(app, options);
+app.start();
+

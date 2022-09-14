@@ -20,10 +20,10 @@ const getAppRegistry = async () => {
             throwError('Could not load App Registry Model!');
 
         
-        AppRegistry.deleteEntry = async (name, ipAddress, port) => {
+        AppRegistry.deleteEntry = async (ipAddress) => {
             try {
                 logToConsole('Deleting any old registry entries.', 'blue');
-                const result = await AppRegistry.deleteOne({name, ipAddress, port});
+                const result = await AppRegistry.deleteOne({ipAddress});
                 console.log(result);
                 result && 
                 logToConsole('Deleted old registry entry.  Info: ') && 
@@ -50,7 +50,7 @@ const getAppRegistry = async () => {
                     return result._id;
             } catch (e) {
                 logToConsole(`createEntry() error.  Error registering server: ${name}!`,'red');
-                console.log(e.stack); //always log error stack unmodified
+                e.stack && console.log(e.stack); //always log error stack unmodified
                 throw e;
 
             }
@@ -59,7 +59,7 @@ const getAppRegistry = async () => {
 
         AppRegistry.saveEntry = async (name, ipAddress, port, endPoints, status) => {
             try {
-                await AppRegistry.deleteEntry(name, ipAddress, port);
+                await AppRegistry.deleteEntry(ipAddress);
                 const result = await AppRegistry.createEntry(name, ipAddress, port, endPoints, status);
                 logToConsole(`${name} saved to registry.`,'green');
                 return result.id;
@@ -74,12 +74,14 @@ const getAppRegistry = async () => {
             console.log(`Searching for `.magenta +`'${serverName}'`.blue);
             try {
                 const result = await AppRegistry.findOne({name: serverName, status: 'Available'});
-                result && console.log(`Located server: ${serverName} `.green);
+                result && logToConsole(`Located server: ${serverName} `, 'green');
+                console.log(result);
                 if (!result) throw Error('Could not locate server!'.red)
                 return result;
             } catch (e) {
+                console.log('Error'.red);
                 logToConsole(`locateEntry() error.  Error locating registry entry for server ${serverName}.`,'red');
-                console.log(e.stack);
+                e.stack && console.log(e.stack);
                 throw e;
             }  
 

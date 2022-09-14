@@ -1,0 +1,1 @@
+GET http://localhost:4500/sneakers/app-registration-server/register/locate?servername=Security Api Server
