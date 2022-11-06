@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/sneakers-page.css" />
+    <link rel="stylesheet" href="../css/sneaker-page-scss.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600&display=swap"rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+    <title>Shoe Search</title>
+  </head>
+  <body>
+    <header>
+      <div id = "page-title">
+          <span>Search the Coolest Styles on the Web</span>
+      </div>
+      <div id="sneaker-navbar">
+        <svg id ="hamburger-icon">
+          <g>
+            <path transform="translate(-2.5,0)" fill-rule="evenodd" d="M4 8h28V6H4"></path>
+            <path transform="translate(-2.5,0)" fill-rule="evenodd" d="M4 16.096h28v-2.001H4"></path>
+            <path transform="translate(-2.5,0)" fill-rule="evenodd" d="M4 24.346h28v-2H4"></path>
+          </g>
+        </svg>
+      </div>
+      <div id = "search-bar">
+        <input type="text" id="search-input" name="search" placeholder = "Jordan" class="search-input">
+        <button type="button" id="search-button">Search</button>
+      </div>
+      <div id="dark-row"></div>      
+    </header>
+    <main>
+      <div id="left-right-cntr">
+        <div id="menu-area">
+          <div id="sneaker-menu">
+            <div class="vert-spacer-70"></div>
+            <div class="sneaker-menu-item">
+                <a id="home" class="sneaker-menu-item" href="">HOME</a>
+            </div>
+            <div id= "x-button">
+                 <button type="button" class="x-button-style" aria-label="Close">  
+                   <span class="x-button-style" aria-hidden="true">&times;</span>
+                 </button>
+            </div>
+            <div class="sneaker-menu-item" id="search-menu-item-cntr">
+                <a id="search" class="sneaker-menu-item active" href="">SNEAKER SEARCH</a>
+            </div>
+            <div class="sneaker-menu-item">
+                <a id="favorites" class="sneaker-menu-item" href="">FAVORITES</a>
+            </div>
+            <div class="sneaker-menu-item">
+                <a id="closet"  class="sneaker-menu-item" href="">CLOSET</a> 
+            </div>  
+            <div class="sneaker-menu-item">
+                <a id="logout"  class="sneaker-menu-item" href="">LOGOUT</a>
+            </div>
+            <div class="sneaker-menu-item">
+                <a id="fun-facts"  class="sneaker-menu-item" href="">FUN FACTS</a> 
+            </div>
+          </div>      
+        </div>
+        <div id="sneaker-area">
+            <section id="top">  <!---------sneaker display--------------->
+            </section>          <!----------end of sneaker display-------> 
+        </div>
+      </div>
+      <section id="bottom">
+        <a href="https://www.flaticon.com/free-icons/closet" title="closet icons">Closet icons created by Smashicons - Flaticon</a>
+      </section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="../js/sneakers.js"></script>
+  </body>
+</html>

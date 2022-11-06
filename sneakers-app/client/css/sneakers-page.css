@@ -1,0 +1,520 @@
+* {
+  margin: 0;
+  padding: 0;
+  
+  /*background-color: #fafafa;*/
+ 
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+
+}
+
+header {
+  display: flex; 
+  flex-direction: column;
+  justify-content:center;
+  align-items: center;
+  color:black;
+  width: 100%;
+  background-color: white;
+  z-index: 1;
+  position: fixed;
+  top: 0;
+  font-size: 10px;
+  font-family: 'League Spartan';
+}
+
+footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+img {
+  width: 175px;
+}
+
+#page-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-weight: 900;
+  padding-top: 25px;
+  min-height:75px;
+  background-color: white;
+  font-size: 36px;
+
+}
+
+#page-title span {
+  padding-top: 10px;
+}
+
+
+@media screen and (max-width: 1279px) {
+  header .left-right-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  min-height: 50px;
+
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  header .left-right-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-end;
+    min-width: 100vw;
+
+  }
+}
+
+#sneaker-navbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: left;
+  margin-left: 150px;
+  width: 40px;
+
+}
+
+svg#hamburger-icon {
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  stroke: rgb(130, 108, 108);
+  margin-top: -45px;
+}
+
+svg#hamburger-icon:hover {
+  cursor: pointer;
+}
+
+button.navbar-toggler {
+  border: none;
+
+}
+
+#x-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  width: 100%;
+  padding-right: 40px;
+  vertical-align: top;
+  margin-top: -20px;
+  padding-top:-20px;
+  padding-bottom:-20px;
+  
+}
+
+.x-button-style {
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  font-size: 40px;
+  color: rgb(130, 108, 108);
+  background-color: rgb(246, 246, 246);
+  border: none;
+  line-height: 0;
+  font-weight: 300;
+}
+
+.vert-spacer-70 {
+  height: 70px;
+}
+
+#sneaker-menu {
+  position: fixed;
+  padding-top: 20px;
+  top:146px;
+  left: -400px;
+  max-width: 400px;
+  width: 100%;
+  height: 100%;
+  color: black;
+  font: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  line-height: 1.45;
+  background-color: rgb(246, 246, 246);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.sneaker-menu-item { 
+  padding-top: 15px;
+  padding-bottom: 15px;
+  width: 100%;
+  padding-left: 36px;
+
+}
+
+div.sneaker-menu-item#search-menu-item-cntr {
+  padding-top: 35px;
+}
+
+.sneaker-menu-item a {
+  text-decoration: none;
+  font-weight: 500;
+  color: rgb(130, 108, 108);
+  line-height: 1.45;
+}
+
+.sneaker-menu-item a:hover {
+  
+  text-decoration: none;
+  color: rgb(64, 64, 64);
+}
+
+#sneaker-menu-trigger:hover {
+  cursor: pointer;
+ }
+ 
+.sneaker-menu-item a.active {
+  color: rgb(130, 108, 108);
+  font-weight: 700;
+}
+
+
+div#left-right-cntr {
+  display: flex;
+  flex-direction: row;
+  justify-content:center;
+  align-items: flex-end;
+  margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+
+}
+
+div#sneaker-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items:flex-end;
+  min-width: 50%;
+  min-height: 100%;
+  background-color: #fff;
+
+}
+
+div#menu-area {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items:flex-end;
+  min-width: 50%;
+  min-height: 100%;
+  background-color: #fff;
+
+}
+
+.left-menu-text {
+  margin-left: 36px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+input.search-input {
+  height: 40px;
+  width: 250px;
+  margin-left: 10px;
+  font-size: 20px;
+  border: 1px solid black;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  border-radius: .25rem;
+  
+}
+
+#search-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: 10px;
+  min-height: 100%;
+  background-color: #fff;
+  width: 100%;
+  margin-top: -45px;
+  margin-bottom:20px;
+
+
+}
+
+#search-button {
+  height: 42px;
+  width: 100px;
+  margin-right: 20px;
+  margin-left: 15px;
+  font-size: 20px;
+  border-radius: .25rem;
+}
+
+main {
+  display: flex; 
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items:center;
+  height:100%;
+  width: 99.9%;
+  background-color: #fafafa;
+  background-size: cover;
+
+}
+
+main image {
+  flex-shrink: 0;
+}
+
+div#dark-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height:40px;
+  background-color: black;
+
+}
+
+div#triangle-down {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: -10px;
+
+}
+
+#triangle-down {
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 30px solid #fff;
+    z-index: 2;
+  }
+
+main #top {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: left;
+  width: 100%;
+  height: 100%;
+  margin-top:50px;
+}
+
+/*#notification-window {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 32px;
+  padding: 5px;
+  width: 100%;
+  border: solid transparent .25px;
+  color: transparent;
+  text-align: center;
+
+}*/
+
+#notification-window.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-top: 100px;
+  margin-left: -37.5%;
+  font-size: 32px;
+  padding: 5px;
+  width: 75%;
+  color:rgb(130, 108, 108);
+  text-align: center;
+
+
+}
+
+section {
+  position: relative;
+  top: 50px;
+ 
+}
+
+#bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height:100px;
+}
+
+section.sneakers {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 40px;
+  margin-bottom: 1em;
+
+}
+
+.ico-sneaker-closet {
+  display: inline-block;
+  width: 36px; height: 36px;
+  background-image: url('../icons/sneaker-closet.png');
+  background-repeat: no-repeat;
+}
+
+div.shoe {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-width: 300px;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 10%
+}
+
+div.favorites {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+  padding-right: 100px;
+  width: 100%;
+}
+
+div.price {
+  display: flex;
+  flex-direction: row;
+  justify-content:center;
+  align-items: flex-end;
+  color: black;
+  font-size: 12px;
+  width:100%;
+  background-color: white;
+
+
+}
+
+div.sneaker-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+}
+
+span.shoe-name {
+  display: flex;
+  height: 50px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-family: 'League Spartan';
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  width: 300px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+span.price-title {
+  margin-left: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content:center;
+  align-items:flex-end;
+  font-size: 13px;
+  color: black;
+
+}
+
+.price {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items:flex-end;
+  font-size: 12px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  padding-top: 10px;
+  width: 150px;
+  border-radius: 30%;
+
+}
+
+span.price-title::after {
+  content: ":";
+}
+
+.price-goat {
+  display: flex;
+  align-items: flex-end;
+  color: green;
+  font-family: 'League Spartan';
+  margin-left: 3px;
+  font-size: 13px;
+
+}
+
+.price-stockx {
+  display: flex;
+  align-items: flex-end;
+  color: red;
+  font-family: 'League Spartan';
+  margin-left: 3px;
+  font-size: 13px;
+
+}
+
+.price-flight-club {
+  display: flex;
+  align-items: flex-end;
+  color:darkorange;
+  font-family: 'League Spartan';
+  font-size: small;
+  margin-left: 3px;
+  font-size: 13px;
+}
+
+#footer {
+  display: flex;
+  flex-direction: column; 
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  background-color:  rgba(238, 238, 238);
+  width: 100%;
+  height: 50px;
+}
+
+
+.invalid-search-edit {
+  color: red;
+}
+
+
+
+

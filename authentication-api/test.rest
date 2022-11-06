@@ -1,0 +1,27 @@
+POST http://localhost:4900/authentication-api-server/authenticate/user
+
+Content-Type: application/json
+
+{"username":"darknite", "password":"Taylor#1973"}
+
+###
+
+GET http://localhost:4850/admin/kill
+
+###
+
+GET http://localhost:4850/admin/healthcheck
+
+###
+
+POST http://localhost:8085/api/v1/users/register
+Content-Type: application/json
+
+{"username":"darknite1971","password":"passW0rd123"}
+
+###
+
+POST http://localhost:8085/api/v1/users/login
+Content-Type: application/json
+
+{"username":"darknite1971","password":"passW0rd123"}

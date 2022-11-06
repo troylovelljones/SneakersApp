@@ -1,0 +1,19 @@
+POST http://localhost:4850/authentication-api-server/authenticate
+Content-Type::"application/json"
+Accept: "application/json"
+
+
+{"username":"bluenight","password":"JtqV8ACbKnD1wKLR9e9a&&"}
+
+###
+GET http://localhost:4850/admin/kill
+
+###
+
+GET http://localhost:4010/user-login-app/getUserLoginUrls
+
+###
+GET http://localhost:4850/authentication-api-server/refreshToken?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5Mi4xNjguMjAxLjciLCJ0b2tlblR5cGUiOiJBY2Nlc3MgVG9rZW4iLCJleHBpcmF0aW9uIjp7ImV4cGlyZXNJbiI6IjFtIn0sImlhdCI6MTY2NTIwODcyNSwiZXhwIjoxNjY1MjA4Nzg1fQ.08Dl1qCyLpjOuNSS2WQMS3QHTMmdy0_Nd3jrD7sJKak&type=Access
+Content-Type::"application/json"
+Accept: "application/json"
+

@@ -1,0 +1,1065 @@
+{
+    "modelName": "New Model",
+    "collections": [
+        {
+            "collectionName": "Registry",
+            "type": "object",
+            "properties": [
+                {
+                    "code": "",
+                    "name": "_id",
+                    "isActivated": true,
+                    "type": "objectId",
+                    "primaryKey": true,
+                    "GUID": "a3b066d8-825c-4b49-a4a4-33d1716e65fd",
+                    "required": true,
+                    "error": {},
+                    "childRelationships": [
+                        "bd104cd6-0a57-446d-9702-0b8ea11aba56"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "endPoints",
+                    "isActivated": true,
+                    "type": "array",
+                    "properties": [
+                        {
+                            "type": "choice",
+                            "properties": [
+                                {
+                                    "subschema": true,
+                                    "isActivated": true,
+                                    "type": "array",
+                                    "GUID": "9ce30ee1-37ac-484a-8e39-d45d58ec62d6",
+                                    "hackoladeMeta": {},
+                                    "properties": [],
+                                    "additionalItems": true,
+                                    "displayName": "url",
+                                    "uniqueItems": true,
+                                    "foreignCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                                    "error": {}
+                                }
+                            ],
+                            "isActivated": true,
+                            "choice": "allOf",
+                            "GUID": "01b4404e-6e1f-4581-9bd9-eafb808a3f75"
+                        }
+                    ],
+                    "additionalItems": true,
+                    "primaryKey": false,
+                    "GUID": "4e88b316-3fa5-4b10-922d-db66a2d19be0",
+                    "required": true,
+                    "error": {},
+                    "dependencies": [
+                        "a3b066d8-825c-4b49-a4a4-33d1716e65fd",
+                        "9743832d-0667-4305-9422-4ecf659c691e"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "ipAddress",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "9743832d-0667-4305-9422-4ecf659c691e",
+                    "required": true,
+                    "sample": "192.168.201.7",
+                    "childRelationships": [
+                        "282ccfdc-31df-49d7-9168-7a60fbd810d6",
+                        "9628b153-0955-496a-8632-7dd6efd50137"
+                    ],
+                    "format": "ipv4",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "name",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "c4c7d48b-0c4c-41ca-8845-f5cd9e91bc48",
+                    "required": true,
+                    "sample": "sneakers-app-server",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "port",
+                    "isActivated": true,
+                    "type": "numeric",
+                    "primaryKey": false,
+                    "GUID": "3e5c7181-a765-4c32-89bb-2216ecf27d76",
+                    "required": true,
+                    "mode": "integer32",
+                    "sample": 4850,
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "status",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "500205e1-fcb6-4eb7-8f6c-3508a7915058",
+                    "required": true,
+                    "sample": "Available",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "createdAt",
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "927a4f54-b430-494c-8780-7c03658c8f5b",
+                    "required": true,
+                    "hackoladeMeta": {},
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "updatedAt",
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "101f265d-8f26-4fd9-96cf-1764ff256203",
+                    "required": true,
+                    "hackoladeMeta": {},
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "__v",
+                    "isActivated": true,
+                    "type": "numeric",
+                    "primaryKey": false,
+                    "GUID": "8c145e71-a2c4-4266-9d27-555a1d72c4f5",
+                    "required": true,
+                    "mode": "integer32",
+                    "sample": 0,
+                    "hackoladeMeta": {},
+                    "error": {}
+                }
+            ],
+            "definitions": {
+                "type": "definitions",
+                "GUID": "21b44abd-03cf-40c0-b086-394a03304cce",
+                "properties": []
+            },
+            "isActivated": true,
+            "additionalProperties": true,
+            "validationLevel": "Off",
+            "validationAction": "Warn",
+            "storageEngineName": "WiredTiger",
+            "collectionUsers": [],
+            "indexes": [
+                {
+                    "key": [
+                        {
+                            "keyId": "a3b066d8-825c-4b49-a4a4-33d1716e65fd",
+                            "type": "ascending"
+                        }
+                    ],
+                    "name": "_id_",
+                    "GUID": "4eae886d-0989-43bf-bcae-b709b51d2d5d"
+                },
+                {
+                    "key": [
+                        {
+                            "keyId": "9743832d-0667-4305-9422-4ecf659c691e",
+                            "type": "ascending"
+                        }
+                    ],
+                    "name": "ipAddress_1",
+                    "background": true,
+                    "unique": true,
+                    "GUID": "17ca51cb-e126-4a21-9d90-cc1bbfec1489"
+                }
+            ],
+            "collation": {},
+            "sharding": {
+                "unique": true,
+                "collation": "null"
+            },
+            "GUID": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+            "bucketId": "b48d5322-e996-4400-9366-75f7d5bdba22",
+            "code": "",
+            "hackoladeMeta": {}
+        },
+        {
+            "collectionName": "Secrets",
+            "type": "object",
+            "properties": [
+                {
+                    "code": "",
+                    "name": "_id",
+                    "isActivated": true,
+                    "type": "objectId",
+                    "primaryKey": true,
+                    "GUID": "2ce60e22-bd41-498a-b769-ffe07be4a45b",
+                    "required": true,
+                    "error": {}
+                },
+                {
+                    "name": "id",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "objectId",
+                    "required": true,
+                    "GUID": "f365d983-47ad-4ba9-8c32-092f611f4ca0",
+                    "foreignCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "foreignField": [
+                        "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                        "a3b066d8-825c-4b49-a4a4-33d1716e65fd"
+                    ],
+                    "relationshipType": "Foreign Key",
+                    "parentRelationship": "bd104cd6-0a57-446d-9702-0b8ea11aba56",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "password",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "dc523c7b-695f-48f4-8b3e-756950115ce5",
+                    "required": true,
+                    "sample": "$2b$12$Ysk3o/QOtM78GAKIwHmweedpiYDKAF.FdFXcYNpQhBUS.U2RKPIQm",
+                    "hackoladeMeta": {},
+                    "error": {},
+                    "dependencies": [
+                        "2ce60e22-bd41-498a-b769-ffe07be4a45b",
+                        "f365d983-47ad-4ba9-8c32-092f611f4ca0"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "accessToken",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "93bdaefa-a4df-4de5-a19c-1545a00f4411",
+                    "required": false,
+                    "sample": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5Mi4xNjguMjAxLjEwIiwidG9rZW5UeXBlIjoiQWNjZXNzIFRva2VuIiwiZXhwaXJhdGlvbiI6eyJleHBpcmVzSW4iOiIxbSJ9LCJpYXQiOjE2NjUzMTg0MTYsImV4cCI6MTY2NTMxODQ3Nn0.pszvbmOybPWuB1XVjGrCY0hcN_9ZHgFwgYFnNDihNOI",
+                    "hackoladeMeta": {},
+                    "error": {},
+                    "dependencies": [
+                        "dc523c7b-695f-48f4-8b3e-756950115ce5"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "accessTokenSecret",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "94ccf8dc-6fdd-4d2e-bea0-7371cb44c22c",
+                    "required": false,
+                    "sample": "f10bf2db-de41-44d5-beeb-4ef56bbae6b9",
+                    "hackoladeMeta": {},
+                    "foreignCollection": "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                    "error": {},
+                    "dependencies": [
+                        "93bdaefa-a4df-4de5-a19c-1545a00f4411"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "refreshToken",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "0a1074a2-b023-45a6-bafc-f345cf0d6b41",
+                    "required": false,
+                    "sample": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5Mi4xNjguMjAxLjEwIiwidG9rZW5UeXBlIjoiUmVmcmVzaCBUb2tlbiIsImV4cGlyYXRpb24iOnsiZXhwaXJlc0luIjoiN2QifSwiaWF0IjoxNjY1MzE4NDE2LCJleHAiOjE2NjU5MjMyMTZ9.uzJ0MY4fG1r0v4gCoWLp9bVF_Gd3NCKjk5Fr-w0VJ_Y",
+                    "hackoladeMeta": {},
+                    "error": {},
+                    "dependencies": [
+                        "93bdaefa-a4df-4de5-a19c-1545a00f4411",
+                        "2ce60e22-bd41-498a-b769-ffe07be4a45b",
+                        "f365d983-47ad-4ba9-8c32-092f611f4ca0",
+                        "dc523c7b-695f-48f4-8b3e-756950115ce5"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "refreshTokenSecret",
+                    "isActivated": true,
+                    "type": "string",
+                    "primaryKey": false,
+                    "GUID": "39419a9b-9f4c-409e-b832-d96dc512482a",
+                    "required": false,
+                    "foreignCollection": "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                    "hackoladeMeta": {},
+                    "error": {},
+                    "dependencies": [
+                        "0a1074a2-b023-45a6-bafc-f345cf0d6b41"
+                    ]
+                },
+                {
+                    "code": "",
+                    "name": "lastAccess",
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "03d44173-9cf0-44e9-a0cc-8bf15ae9aeb7",
+                    "required": false,
+                    "error": {},
+                    "dependencies": [
+                        "2ce60e22-bd41-498a-b769-ffe07be4a45b",
+                        "f365d983-47ad-4ba9-8c32-092f611f4ca0"
+                    ]
+                },
+                {
+                    "name": "createdAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "20d9f5c6-c2e0-46d0-bf44-6944141a8ec3",
+                    "error": {}
+                },
+                {
+                    "name": "updatedAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "0bfa7b5a-dad9-4909-94a5-d9cfe6278d28",
+                    "error": {}
+                },
+                {
+                    "name": "_v",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "numeric",
+                    "GUID": "17dec840-591f-4ae4-aaf3-adf253312249",
+                    "required": true,
+                    "error": {}
+                }
+            ],
+            "definitions": {
+                "type": "definitions",
+                "GUID": "cc1be7eb-b163-42ae-8b22-4c4a2b8a5eaa",
+                "properties": []
+            },
+            "isActivated": true,
+            "additionalProperties": true,
+            "validationLevel": "Off",
+            "validationAction": "Warn",
+            "storageEngineName": "WiredTiger",
+            "collectionUsers": [],
+            "indexes": [
+                {
+                    "key": [
+                        {
+                            "keyId": "2ce60e22-bd41-498a-b769-ffe07be4a45b",
+                            "type": "ascending"
+                        }
+                    ],
+                    "name": "_id_",
+                    "GUID": "f382fc39-822e-435b-9ec9-36182f5227b9"
+                },
+                {
+                    "key": [
+                        {
+                            "keyId": "a22ac883-6383-4f31-9da6-7b0af4249e4a",
+                            "type": "ascending"
+                        }
+                    ],
+                    "name": "id_1",
+                    "background": true,
+                    "unique": true,
+                    "GUID": "68e8c4cc-9ff0-4a05-9811-53c9ff6e08ca"
+                }
+            ],
+            "collation": {},
+            "sharding": {
+                "unique": true,
+                "collation": "null"
+            },
+            "GUID": "7de768a8-4a88-4260-be59-e2a09ad394fc",
+            "bucketId": "b48d5322-e996-4400-9366-75f7d5bdba22",
+            "code": "",
+            "hackoladeMeta": {}
+        },
+        {
+            "collectionName": "Server Log",
+            "type": "object",
+            "properties": [
+                {
+                    "name": "_id",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "objectId",
+                    "GUID": "5dc06c54-840c-4047-8ed8-379639d057f8",
+                    "primaryKey": true,
+                    "required": true,
+                    "error": {}
+                },
+                {
+                    "name": "date",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "a2e36ca8-9bf5-48a9-9a8f-659248732240",
+                    "required": true,
+                    "error": {},
+                    "dependencies": [
+                        "5dc06c54-840c-4047-8ed8-379639d057f8"
+                    ]
+                },
+                {
+                    "name": "hostIp",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "581cfe0b-d0a3-455b-93b8-c806573b0f8d",
+                    "format": "ipv4",
+                    "foreignCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "foreignField": [
+                        "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                        "9743832d-0667-4305-9422-4ecf659c691e"
+                    ],
+                    "relationshipType": "Foreign Key",
+                    "parentRelationship": "9628b153-0955-496a-8632-7dd6efd50137",
+                    "error": {},
+                    "dependencies": [
+                        "5dc06c54-840c-4047-8ed8-379639d057f8",
+                        "a2e36ca8-9bf5-48a9-9a8f-659248732240"
+                    ]
+                },
+                {
+                    "name": "clientIp",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "5c2914df-0bd1-42ed-9388-027f60e9845e",
+                    "format": "ipv4",
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "phase",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "49171ee3-7dc0-4898-a5a6-b77dbc55fc6a",
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "logLevel",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "08777b4f-387c-4fbc-b168-6c0edd70d5bb",
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "nameSpace",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "3f758c64-8fca-4c21-a787-8e49a7779761",
+                    "required": true,
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "message",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "823c97d5-6790-409e-92c5-b852df69c4cf",
+                    "required": true,
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "traceId",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "objectId",
+                    "GUID": "1f525938-52e5-42eb-bad4-8da6eabd8cd8",
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "timeSinceLastLogEntry",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "numeric",
+                    "GUID": "ff05ac20-e225-4a6a-927c-4f8fd77df08b",
+                    "error": {},
+                    "dependencies": [
+                        "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                    ]
+                },
+                {
+                    "name": "createdAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "93f8ea5d-2cd9-4ea8-85f0-eb5d3e9d3a7e",
+                    "error": {}
+                },
+                {
+                    "name": "updatedAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "b5c115b4-5f67-4e59-896d-59c669e4ef29",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "__v",
+                    "isActivated": true,
+                    "type": "numeric",
+                    "primaryKey": false,
+                    "GUID": "c19d09f5-4d53-4472-a112-d93d6085cd7a",
+                    "required": true,
+                    "mode": "integer32",
+                    "sample": 0,
+                    "hackoladeMeta": {},
+                    "error": {}
+                }
+            ],
+            "definitions": {
+                "type": "definitions",
+                "properties": [],
+                "GUID": "fb675052-dfbc-40b8-bd4b-09d22643800e"
+            },
+            "isActivated": true,
+            "additionalProperties": false,
+            "validationLevel": "Off",
+            "validationAction": "Warn",
+            "storageEngineName": "WiredTiger",
+            "collectionUsers": [],
+            "indexes": [],
+            "collation": {},
+            "sharding": {
+                "unique": true,
+                "collation": "null"
+            },
+            "GUID": "9b247e6a-82b6-4700-aacf-0d708132350f",
+            "bucketId": "b48d5322-e996-4400-9366-75f7d5bdba22"
+        },
+        {
+            "collectionName": "Server Data",
+            "type": "object",
+            "properties": [
+                {
+                    "code": "",
+                    "name": "_id",
+                    "isActivated": true,
+                    "type": "objectId",
+                    "primaryKey": true,
+                    "GUID": "2afee485-dc81-4bd1-9346-d38786039c10",
+                    "required": true,
+                    "error": {}
+                },
+                {
+                    "name": "ipAddress",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "string",
+                    "GUID": "7603bfa2-6b70-4552-8657-3e97591bd817",
+                    "foreignCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "foreignField": [
+                        "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                        "9743832d-0667-4305-9422-4ecf659c691e"
+                    ],
+                    "relationshipType": "Foreign Key",
+                    "parentRelationship": "282ccfdc-31df-49d7-9168-7a60fbd810d6",
+                    "required": true,
+                    "error": {}
+                },
+                {
+                    "name": "data",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "document",
+                    "properties": [
+                        {
+                            "name": "date",
+                            "hackoladeMeta": {},
+                            "isActivated": true,
+                            "type": "date",
+                            "primaryKey": false,
+                            "GUID": "d6bfde58-046a-4f1e-9fa0-f5d95f86a73a",
+                            "required": true,
+                            "error": {}
+                        },
+                        {
+                            "name": "requestCount",
+                            "hackoladeMeta": {},
+                            "isActivated": true,
+                            "type": "numeric",
+                            "GUID": "2ecdb93a-828b-4168-9916-718c557371cb",
+                            "mode": "integer32",
+                            "required": true,
+                            "error": {}
+                        },
+                        {
+                            "name": "errorCount",
+                            "hackoladeMeta": {},
+                            "isActivated": true,
+                            "type": "numeric",
+                            "GUID": "849a71ca-82d6-4dbf-b970-b14102245962",
+                            "mode": "integer32",
+                            "required": true,
+                            "error": {}
+                        },
+                        {
+                            "name": "memory",
+                            "hackoladeMeta": {},
+                            "isActivated": true,
+                            "type": "numeric",
+                            "GUID": "ace0b68e-0bf3-4681-aa5c-ae75f2392928",
+                            "required": true,
+                            "error": {}
+                        },
+                        {
+                            "name": "diskSpace",
+                            "hackoladeMeta": {},
+                            "isActivated": true,
+                            "type": "numeric",
+                            "GUID": "dfa07c22-b975-4543-9939-9ff13d20f9ce",
+                            "required": true,
+                            "error": {}
+                        }
+                    ],
+                    "additionalProperties": false,
+                    "GUID": "8a94971e-f786-4da5-92b7-6a2881d9350a",
+                    "required": true,
+                    "error": {},
+                    "dependencies": [
+                        "2afee485-dc81-4bd1-9346-d38786039c10",
+                        "7603bfa2-6b70-4552-8657-3e97591bd817"
+                    ]
+                },
+                {
+                    "name": "createdAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "866cedea-ba78-48f8-b000-9f463143d869",
+                    "error": {}
+                },
+                {
+                    "name": "updatedAt",
+                    "hackoladeMeta": {},
+                    "isActivated": true,
+                    "type": "date",
+                    "primaryKey": false,
+                    "GUID": "31fd3580-6c9d-4731-96b5-dd6aa76f0fb3",
+                    "error": {}
+                },
+                {
+                    "code": "",
+                    "name": "__v",
+                    "isActivated": true,
+                    "type": "numeric",
+                    "primaryKey": false,
+                    "GUID": "15e6b8f1-48c5-4546-8ea3-a2a1a519ee01",
+                    "required": true,
+                    "mode": "integer32",
+                    "sample": 0,
+                    "hackoladeMeta": {},
+                    "error": {}
+                }
+            ],
+            "definitions": {
+                "type": "definitions",
+                "properties": [],
+                "GUID": "f57b4f63-b9d7-4277-b09b-f19e76b2b504"
+            },
+            "isActivated": true,
+            "additionalProperties": false,
+            "validationLevel": "Off",
+            "validationAction": "Warn",
+            "storageEngineName": "WiredTiger",
+            "collectionUsers": [],
+            "indexes": [],
+            "collation": {},
+            "sharding": {
+                "unique": true,
+                "collation": "null"
+            },
+            "GUID": "9838638f-6566-4fa6-a89c-c683bffaebbb",
+            "bucketId": "b48d5322-e996-4400-9366-75f7d5bdba22"
+        }
+    ],
+    "buckets": [
+        {
+            "name": "Sneakers",
+            "type": "bucket",
+            "collectionIds": [
+                "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                "9b247e6a-82b6-4700-aacf-0d708132350f",
+                "9838638f-6566-4fa6-a89c-c683bffaebbb"
+            ],
+            "backgroundColor": {
+                "r": 216,
+                "g": 0,
+                "b": 115,
+                "a": 1
+            },
+            "show": true,
+            "isActivated": true,
+            "GUID": "b48d5322-e996-4400-9366-75f7d5bdba22",
+            "code": "",
+            "hackoladeMeta": {}
+        }
+    ],
+    "views": [],
+    "relationships": [
+        {
+            "name": "fk server_data.ipAddress to registries.ipAddress",
+            "relationshipType": "Foreign Key",
+            "parentField": [
+                [
+                    "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "9743832d-0667-4305-9422-4ecf659c691e"
+                ]
+            ],
+            "parentCardinality": "1",
+            "childField": [
+                [
+                    "9838638f-6566-4fa6-a89c-c683bffaebbb",
+                    "7603bfa2-6b70-4552-8657-3e97591bd817"
+                ]
+            ],
+            "childCardinality": "1..n",
+            "GUID": "282ccfdc-31df-49d7-9168-7a60fbd810d6",
+            "parentCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+            "childCollection": "9838638f-6566-4fa6-a89c-c683bffaebbb"
+        },
+        {
+            "name": "fk server_log.New Field.clientIp to server_log.New Field.hostIp",
+            "relationshipType": "Foreign Key",
+            "parentField": [
+                [
+                    "9b247e6a-82b6-4700-aacf-0d708132350f",
+                    "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                ]
+            ],
+            "parentCardinality": "1",
+            "childField": [],
+            "childCardinality": "1",
+            "parentCollection": "9b247e6a-82b6-4700-aacf-0d708132350f",
+            "childCollection": "",
+            "GUID": "1f04488f-1d9d-40fd-94e4-658394d6ce86"
+        },
+        {
+            "name": "fk server_log.New Field.clientIp to server_log.New Field.hostIp",
+            "relationshipType": "",
+            "parentField": [],
+            "parentCardinality": "1",
+            "childField": [
+                [
+                    "9b247e6a-82b6-4700-aacf-0d708132350f",
+                    "5c2914df-0bd1-42ed-9388-027f60e9845e"
+                ]
+            ],
+            "childCardinality": "1",
+            "parentCollection": "",
+            "childCollection": "9b247e6a-82b6-4700-aacf-0d708132350f",
+            "GUID": "54b4ec20-9df8-423a-86c7-49d3a48cbc9d"
+        },
+        {
+            "name": "fk Secrets.id to Registry._id",
+            "relationshipType": "Foreign Key",
+            "parentField": [
+                [
+                    "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "a3b066d8-825c-4b49-a4a4-33d1716e65fd"
+                ]
+            ],
+            "parentCardinality": "1",
+            "childField": [
+                [
+                    "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                    "f365d983-47ad-4ba9-8c32-092f611f4ca0"
+                ]
+            ],
+            "childCardinality": "1",
+            "GUID": "bd104cd6-0a57-446d-9702-0b8ea11aba56",
+            "parentCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+            "childCollection": "7de768a8-4a88-4260-be59-e2a09ad394fc"
+        },
+        {
+            "name": "fk Log Entries.hostIp to Registry.ipAddress",
+            "relationshipType": "Foreign Key",
+            "parentField": [
+                [
+                    "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                    "9743832d-0667-4305-9422-4ecf659c691e"
+                ]
+            ],
+            "parentCardinality": "1",
+            "childField": [
+                [
+                    "9b247e6a-82b6-4700-aacf-0d708132350f",
+                    "581cfe0b-d0a3-455b-93b8-c806573b0f8d"
+                ]
+            ],
+            "childCardinality": "1..n",
+            "GUID": "9628b153-0955-496a-8632-7dd6efd50137",
+            "parentCollection": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+            "childCollection": "9b247e6a-82b6-4700-aacf-0d708132350f"
+        }
+    ],
+    "users": [],
+    "diagramViews": [
+        {
+            "GUID": "d1bf3820-01c0-4728-a42b-4db04ecd813f",
+            "name": "New Diagram View",
+            "buckets": [
+                "b48d5322-e996-4400-9366-75f7d5bdba22"
+            ],
+            "entities": [
+                "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                "9b247e6a-82b6-4700-aacf-0d708132350f",
+                "9838638f-6566-4fa6-a89c-c683bffaebbb"
+            ]
+        }
+    ],
+    "idToNameHashTable": {
+        "b48d5322-e996-4400-9366-75f7d5bdba22": "Sneakers",
+        "a3b066d8-825c-4b49-a4a4-33d1716e65fd": "_id",
+        "4e88b316-3fa5-4b10-922d-db66a2d19be0": "endPoints",
+        "c4c7d48b-0c4c-41ca-8845-f5cd9e91bc48": "name",
+        "9743832d-0667-4305-9422-4ecf659c691e": "ipAddress",
+        "3e5c7181-a765-4c32-89bb-2216ecf27d76": "port",
+        "500205e1-fcb6-4eb7-8f6c-3508a7915058": "status",
+        "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e": "Registry",
+        "2ce60e22-bd41-498a-b769-ffe07be4a45b": "_id",
+        "03d44173-9cf0-44e9-a0cc-8bf15ae9aeb7": "lastAccess",
+        "7de768a8-4a88-4260-be59-e2a09ad394fc": "Secrets",
+        "9b247e6a-82b6-4700-aacf-0d708132350f": "Server Log",
+        "9838638f-6566-4fa6-a89c-c683bffaebbb": "Server Data",
+        "2afee485-dc81-4bd1-9346-d38786039c10": "_id",
+        "94ccf8dc-6fdd-4d2e-bea0-7371cb44c22c": "accessTokenSecret",
+        "93bdaefa-a4df-4de5-a19c-1545a00f4411": "accessToken",
+        "4902ab7b-4fc0-4ca3-a2e2-a29a405d0a26": "New view",
+        "d1bf3820-01c0-4728-a42b-4db04ecd813f": "New Diagram View",
+        "7603bfa2-6b70-4552-8657-3e97591bd817": "ipAddress",
+        "282ccfdc-31df-49d7-9168-7a60fbd810d6": "fk server_data.ipAddress to registries.ipAddress",
+        "39419a9b-9f4c-409e-b832-d96dc512482a": "refreshTokenSecret",
+        "0a1074a2-b023-45a6-bafc-f345cf0d6b41": "refreshToken",
+        "dc523c7b-695f-48f4-8b3e-756950115ce5": "password",
+        "927a4f54-b430-494c-8780-7c03658c8f5b": "createdAt",
+        "101f265d-8f26-4fd9-96cf-1764ff256203": "updatedAt",
+        "8c145e71-a2c4-4266-9d27-555a1d72c4f5": "__v",
+        "866cedea-ba78-48f8-b000-9f463143d869": "createdAt",
+        "31fd3580-6c9d-4731-96b5-dd6aa76f0fb3": "updatedAt",
+        "15e6b8f1-48c5-4546-8ea3-a2a1a519ee01": "__v",
+        "f365d983-47ad-4ba9-8c32-092f611f4ca0": "id",
+        "a2e36ca8-9bf5-48a9-9a8f-659248732240": "date",
+        "c19d09f5-4d53-4472-a112-d93d6085cd7a": "__v",
+        "20d9f5c6-c2e0-46d0-bf44-6944141a8ec3": "createdAt",
+        "0bfa7b5a-dad9-4909-94a5-d9cfe6278d28": "updatedAt",
+        "17dec840-591f-4ae4-aaf3-adf253312249": "_v",
+        "1f04488f-1d9d-40fd-94e4-658394d6ce86": "fk server_log.New Field.clientIp to server_log.New Field.hostIp",
+        "54b4ec20-9df8-423a-86c7-49d3a48cbc9d": "fk server_log.New Field.clientIp to server_log.New Field.hostIp",
+        "8a94971e-f786-4da5-92b7-6a2881d9350a": "data",
+        "d6bfde58-046a-4f1e-9fa0-f5d95f86a73a": "date",
+        "2ecdb93a-828b-4168-9916-718c557371cb": "requestCount",
+        "849a71ca-82d6-4dbf-b970-b14102245962": "errorCount",
+        "ace0b68e-0bf3-4681-aa5c-ae75f2392928": "memory",
+        "dfa07c22-b975-4543-9939-9ff13d20f9ce": "diskSpace",
+        "5dc06c54-840c-4047-8ed8-379639d057f8": "_id",
+        "5c2914df-0bd1-42ed-9388-027f60e9845e": "clientIp",
+        "823c97d5-6790-409e-92c5-b852df69c4cf": "message",
+        "ff05ac20-e225-4a6a-927c-4f8fd77df08b": "timeSinceLastLogEntry",
+        "93f8ea5d-2cd9-4ea8-85f0-eb5d3e9d3a7e": "createdAt",
+        "b5c115b4-5f67-4e59-896d-59c669e4ef29": "updatedAt",
+        "581cfe0b-d0a3-455b-93b8-c806573b0f8d": "hostIp",
+        "3f758c64-8fca-4c21-a787-8e49a7779761": "nameSpace",
+        "49171ee3-7dc0-4898-a5a6-b77dbc55fc6a": "phase",
+        "08777b4f-387c-4fbc-b168-6c0edd70d5bb": "logLevel",
+        "bd104cd6-0a57-446d-9702-0b8ea11aba56": "fk Secrets.id to Registry._id",
+        "9628b153-0955-496a-8632-7dd6efd50137": "fk Log Entries.hostIp to Registry.ipAddress",
+        "1f525938-52e5-42eb-bad4-8da6eabd8cd8": "traceId"
+    },
+    "definitions": {
+        "type": "definitions",
+        "properties": [],
+        "GUID": "ffe1372f-8ca8-4db4-b26a-0eb8174765d9"
+    },
+    "polyglotDefinitions": {
+        "type": "polyglotDefinitions",
+        "properties": [],
+        "GUID": "34e97cd3-4950-4f69-99a9-163e76b76875"
+    },
+    "externalDefinitions": {
+        "type": "externalDefinitions",
+        "properties": [],
+        "GUID": "38812ce2-c02e-4c80-9786-7a82c588d7a7"
+    },
+    "sources": [],
+    "decorativeSymbols": [],
+    "dbVersion": "v5.0",
+    "dbVendor": "MongoDB",
+    "appTarget": "MONGODB",
+    "creationTS": "2022-10-10T16:16:20.439Z",
+    "GUID": "86af170f-a2fc-49ab-9c7d-d79e83654fed",
+    "isLineageEnabled": false,
+    "lastModifTS": "2022-10-19T22:56:32.625Z",
+    "persistenceSchemaVersion": "6",
+    "isCreatedByPlugin": true,
+    "pluginInformation": {
+        "pluginEngineVersion": "1.0.0"
+    },
+    "applicationInformation": {
+        "version": "6.5.4"
+    },
+    "hackoladeMeta": {},
+    "settings": {
+        "centralPane": {
+            "dbLevel": {
+                "erd": [
+                    {
+                        "GUID": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                        "x": 86.71510791366913,
+                        "y": 133.79856115107924,
+                        "width": 263,
+                        "height": 231,
+                        "color": {}
+                    },
+                    {
+                        "GUID": "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                        "x": 401.34388489208675,
+                        "y": 458.54676258992714,
+                        "width": 294,
+                        "height": 231,
+                        "color": {}
+                    },
+                    {
+                        "GUID": "9b247e6a-82b6-4700-aacf-0d708132350f",
+                        "x": 420.1395683453238,
+                        "y": 119.32374100719433,
+                        "width": 283,
+                        "height": 267,
+                        "color": {}
+                    },
+                    {
+                        "GUID": "9838638f-6566-4fa6-a89c-c683bffaebbb",
+                        "x": 91.09496402877699,
+                        "y": 460.3064748201447,
+                        "width": 253,
+                        "height": 231,
+                        "color": {}
+                    }
+                ],
+                "buckets": [
+                    {
+                        "x": 46.71510791366913,
+                        "y": 79.32374100719433,
+                        "GUID": "b48d5322-e996-4400-9366-75f7d5bdba22"
+                    }
+                ],
+                "collapsedNodes": [],
+                "activeRelationship": "",
+                "activeRelationshipFields": {
+                    "childField": [],
+                    "parentField": []
+                },
+                "selectedCollections": [],
+                "displayColorPicker": false,
+                "graphView": {
+                    "erd": [],
+                    "buckets": [],
+                    "decorativeSymbols": [],
+                    "forceLayout": true,
+                    "defaultLinkLength": 300
+                },
+                "diagramViews": [
+                    {
+                        "GUID": "d1bf3820-01c0-4728-a42b-4db04ecd813f",
+                        "entities": [
+                            {
+                                "GUID": "7ca0b1f1-f12a-4cf3-8552-1cc4a6268f3e",
+                                "x": 523.8333338101704,
+                                "y": 90,
+                                "width": 263,
+                                "height": 231,
+                                "color": {}
+                            },
+                            {
+                                "GUID": "7de768a8-4a88-4260-be59-e2a09ad394fc",
+                                "x": 90,
+                                "y": 145.99999904632568,
+                                "width": 294,
+                                "height": 231,
+                                "color": {}
+                            },
+                            {
+                                "GUID": "9b247e6a-82b6-4700-aacf-0d708132350f",
+                                "x": 775.0000004768372,
+                                "y": 355.9999990463257,
+                                "width": 283,
+                                "height": 267,
+                                "color": {}
+                            },
+                            {
+                                "GUID": "9838638f-6566-4fa6-a89c-c683bffaebbb",
+                                "x": 472.00000047683716,
+                                "y": 355.9999990463257,
+                                "width": 253,
+                                "height": 231,
+                                "color": {}
+                            }
+                        ],
+                        "buckets": [
+                            {
+                                "x": 50,
+                                "y": 50,
+                                "GUID": "b48d5322-e996-4400-9366-75f7d5bdba22"
+                            }
+                        ],
+                        "graphView": {
+                            "erd": [],
+                            "buckets": [],
+                            "decorativeSymbols": [],
+                            "forceLayout": true,
+                            "defaultLinkLength": 300
+                        }
+                    }
+                ],
+                "decorativeSymbols": [],
+                "nestedCollectionsLayout": "horizontal",
+                "options": []
+            },
+            "collectionLevel": {},
+            "changed": false
+        },
+        "dtDiagram": {
+            "collapsedNodes": [],
+            "shouldDistributeCollections": false
+        }
+    }
+}

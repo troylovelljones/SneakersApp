@@ -12,15 +12,23 @@
   "dependencies": {
     "@supercharge/strings": "^1.28.0",
     "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
+    "cloc": "^2.10.0",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
     "dotenv": "^16.0.1",
-    "express": "^4.18.1",
+    "express": "^4.18.2",
+    "express-winston": "^4.2.0",
+    "ip": "^1.1.8",
+    "jsonwebtoken": "^8.5.1",
+    "local-ip": "^2.0.0",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.21.4",
-    "sneaks-api": "^1.2.3"
+    "sneaks-api": "^1.2.3",
+    "winston": "^3.8.2",
+    "winston-transport-http-stream": "^0.1.4"
   }
 }
