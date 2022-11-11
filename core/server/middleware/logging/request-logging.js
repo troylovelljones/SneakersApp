@@ -8,7 +8,6 @@ const requestLogger = { requestCount: 0 };
 const logRequest = (req, res, next) => {
     ++requestLogger.requestCount;
     next();
-
 };
 
 const updateRequestCount = () => {

@@ -1,9 +1,10 @@
 "use strict";
 
 const { v4 } = require('uuid');
+const { throwError } = require('../../validation/validation');
 
 function getModuleName(path, depth=1) {
-  !path && throwError('Invalid file name!');
+  !path && throwError('Invalid path!');
   const levels = path.split('/');
   depth = Math.min(levels.length, depth);
   let result = '';

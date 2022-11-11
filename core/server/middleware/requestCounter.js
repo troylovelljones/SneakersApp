@@ -8,7 +8,9 @@ const requestCount = (req, res, next) => {
 }
 
 const getRequestCount = () => {
-    return requestCounter.requestCount;
+    const count = requestCounter.requestCount;
+    requestCounter.requestCount = 0;
+    return count;
 }
 
 module.exports = { requestCount, getRequestCount };

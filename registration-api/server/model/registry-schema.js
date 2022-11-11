@@ -39,8 +39,7 @@ const createRegistrySchema = () => {
                 },
                 endPoints: {
                     type: Array
-                },
-                numRequests: Number
+                }
             },
         { collection: 'registry' });
     }

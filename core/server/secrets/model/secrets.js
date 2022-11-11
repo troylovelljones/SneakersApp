@@ -2,7 +2,7 @@
 
 const colors = require('colors');
 const createSecretsSchema = require('./secrets-schema');
-const { error, log, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const { error, info, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 const { generateUniqueKey } = require('../../utils/extended-app-utils');
 const getConnection = require('../../repository/databases/mongodb/mongo-database');
 const { getModel } = require('../../repository/databases/mongodb/model/model');
@@ -11,21 +11,21 @@ const { throwError } = require('../../../validation/validation');
 const getSecrets = async () => {
   try {
       await getConnection();
-      const Secrets = await getModel('Secrets', createSecretsSchema);
-      Secrets && log('Sucessfully loaded Secrets Model'.green);
+      const Secrets = await getModel('secrets', createSecretsSchema);
+      Secrets && info('Sucessfully loaded Secrets Model'.green);
       !Secrets && throwError('Could not load Secrets Model!');
 
       Secrets.locateSecretsById = async (id) => {
         try {
-          log(`Searching for `.magenta + `${id}'s secret.`.blue);
+          info(`Searching for `.magenta + `${id}'s secret.`.blue);
           const result = await Secrets.findOne({id}).exec();
-          log('Search result');
-          log(JSON.stringify(result, null, 2));
-          result ? log(`Located secret.`) : log('Could not locate secret.'.yellow);
+          info('Search result');
+          info(`${JSON.stringify(result, null, 2)}`);
+          result ? info(`Located secret.`) : info('Could not locate secret.'.yellow);
           return result;
         } catch (e) {
-            e && error(JSON.stringify(e));
-            e.stack && error(JSON.stringify(e.stack));
+            e && error(`${JSON.stringify(e, null, 2)}`);
+            e.stack && error(`${JSON.stringify(e.stack, null, 2)}`);
             error('Error'.red);
             error(` locateEntry() error.  Error locating secret for server ${id}.`);
             throw e;
@@ -33,21 +33,21 @@ const getSecrets = async () => {
       };
 
       Secrets.locateSecretsByToken = async (token, tokenType) => {
-        log(`Searching for secrets using token: `.magenta + `${token}`.blue);
+        info(`Searching for secrets using token: `.magenta + `${token}`.blue);
         try {
-          log('<----------start of locateSecretsByToken()---------->'.cyan);
-          log(tokenType + '= ');
-          log(token);
+          info('<----------start of locateSecretsByToken()---------->'.cyan);
+          info(tokenType + '= ');
+          info(`${JSON.stringify(token, null, 2)}`);
           const criteria = (tokenType.toUpperCase().includes('ACCESS') && { accessToken: token }) || (tokenType.toUpperCase().includes('REFRESH') && { refreshToken: token });
-          log(`Searching secrets by token.  Token = ${JSON.stringify(token)}`);
+          info(`Searching secrets by token.  Token = ${JSON.stringify(token)}`);
           const result = await Secrets.findOne(criteria).exec();
-          result && log(`Located secret.`.green) && log(result);
-          !result && log('Could not locate secret.'.yellow);
-          log('<----------end of locateSecretsByToken()---------->');
+          result && info(`Located secret.`.green) && info(result);
+          !result && info('Could not locate secret.'.yellow);
+          info('<----------end of locateSecretsByToken()---------->');
           return result || {};
         } catch (e) {
-            e && error(e, metaData);
-            e.stack && error(JSON.stringify(e.stack));
+            e && error(`${JSON.stringify(e, null,2)}`, metaData);
+            e.stack && error(`${JSON.stringify(e.stack)}`);
             error('Error');
             error(`locateEntry() error.  Error locating secret for server`);
           throw e;
@@ -56,19 +56,19 @@ const getSecrets = async () => {
 
       Secrets.saveSecrets = async (id, secrets) => {
         try {
-          log('<----------start of saveSecrets()---------->'.cyan);
-          log('Tokens - saveSecrets(): ');
-          log(JSON.stringify(secrets, null, 2));
+          info('<----------start of saveSecrets()---------->'.cyan);
+          info('Tokens - saveSecrets(): ');
+          info(JSON.stringify(secrets, null, 2));
           const { accessToken, refreshToken, password } = secrets;
           const doc = await Secrets.locateSecretsById(id);
-          log('Tokens-69');
+          info('Tokens-69');
           const { authenticateTokenAsync } = require('../services/token');
           accessToken && authenticateTokenAsync(accessToken.jwt, accessToken.secret);
           refreshToken && authenticateTokenAsync(refreshToken.jwt, refreshToken.secret);
           //update existing secret
           if (doc && Object.keys(doc).length > 0) {
-            log(`Updating secret for ${id}.`.blue);
-            log(doc);
+            info(`Updating secret for ${id}.`.blue);
+            info(`${JSON.stringify(doc, null, 2)}`);
             doc.accessToken =
               (accessToken && accessToken.jwt) || doc.accessToken;
             doc.accessTokenSecret =
@@ -81,7 +81,7 @@ const getSecrets = async () => {
             const result = await doc.save();
             return result;
           }
-          log(`Saving secrets document for id = ${id}.`)
+          info(`Saving secrets document for id = ${id}.`)
           //this needs to be refactored.  Shouldn't be passing an object to this function!!
           //or create a new secret
          
@@ -93,12 +93,12 @@ const getSecrets = async () => {
             refreshTokenSecret: refreshToken && refreshToken.secret,
             password
           }).save();
-          log(`Secrets saved.`, 'green');
-          log('<----------end of saveSecrets()---------->'.cyan);
+          info(`Secrets saved.`, 'green');
+          info('<----------end of saveSecrets()---------->'.cyan);
           return result;
         } catch (e) {
             error('saveSecret() error');
-            e.stack && error(e.stack); //always log javaScript error stack
+            e.stack && error(`${JSON.stringify(e.stack, null, 2)}`); //always log javaScript error stack
             throw e;
         }
       };

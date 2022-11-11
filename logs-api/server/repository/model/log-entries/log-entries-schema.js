@@ -7,35 +7,50 @@ const createLogEntriesSchema = () => {
   const schema = new mongoose.Schema(
     {
       timestamp: {
-        type: String,
+        type: Date,
         required: true,
+        immutable: true
       },
       hostIp: {
-        type: String
+        type: String,
+        required: true,
+        immutable: true
       },
       clientIp: {
-        type: String
+        type: String,
+        immutable: true
       },
       phase: {
-        type: String
+        type: String,
+        required: true,
+        immutable: true
       },
-      logLevel : {
-        type: String
+      level : {
+        type: String,
+        required: true,
+        immutable: true
       },
       module: {
-        type: String
+        type: String,
+        required: true,
+        immutable: true
       },
       message: {
-        type: String
+        type: String,
+        required: true,
+        immutable: true
       },
       traceId: {
-        type: String
+        type: String,
+        immutable: true
       },
       timeSinceLastLogEntry: {
         type: Schema.Types.Number
       },
       serverName: {
-        type: String
+        type: String,
+        required: true,
+        immutable: true
       },
       createdAt: {
         type: Date,

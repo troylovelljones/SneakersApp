@@ -1,5 +1,5 @@
 "use strict";
-const { getModel } = require('../../../../core/server/repository/databases/mongodb/model/model');
+const { getModel } = require('../../../../../core/server/repository/databases/mongodb/model/model');
 const createLogEntriesSchema = require('./log-entries-schema');
 let LogEntries;
 
@@ -14,7 +14,7 @@ const getLogEntries = async() => {
 }
 
 module.exports = {
-    saveLogEntries,
-    getLogEntries
+  saveLogEntries,
+  getLogEntries
 }
 

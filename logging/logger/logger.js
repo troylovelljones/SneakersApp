@@ -6,7 +6,7 @@ const { colorize, combine, label, ms, printf, timestamp, prettyPrint } = format;
 const HOST_IP = require('../../core/server/utils/host-ip');
 const colors = require('colors');
 const env = require('dotenv').config();
-const SERVER_NAME = process.env.SERVER_NAME || 'none';
+const DEFAULT_PORT = 4080;
 const loggers = new Map();
 const suspendLogging = [];
 
@@ -32,8 +32,8 @@ function colorMessage (message, stack, level) {
 };
 
 function create (moduleName, options) {
-  //keeps module name immutable if immutable is set
-  options = options ? options : {};
+  
+  options = options || {};
   const formatModule = format((info, opts) => {
     //if moduleName is immutable, it keeps getting set to the orinal moduleName value
     if (info.immutable) {
@@ -51,13 +51,13 @@ function create (moduleName, options) {
         ms(),
         formatModule(),
         prettyPrint(),
-        getFormatter()
+        getFormatter(),
       ),
-      defaultMeta: { module: moduleName, serverName: SERVER_NAME },
+      defaultMeta: { module: moduleName, serverName: options.serverName },
       transports: [new transports.Console()],
       exceptionHandlers: [new transports.Console()]
     });
-  logger.add(new winston.transports.Http(getHttpLoggerConfig()))
+  logger.add(new winston.transports.Http(getHttpLoggerConfig(options)))
   loggers.set(moduleName, logger);
   return loggers;
 };
@@ -85,7 +85,7 @@ function getFormatter() {
   });
 }
 
-function getHttpLoggerConfig() {
+function getHttpLoggerConfig(options) {
 
   //host: (Default: localhost) Remote host of the HTTP logging endpoint
   //port: (Default: 80 or 443) Remote port of the HTTP logging endpoint
@@ -95,11 +95,11 @@ function getHttpLoggerConfig() {
   //batch: (Default: false) Value indicating if batch mode should be used. A batch of logs to send through the HTTP request when one of the batch options is reached: number of elements, or timeout
   //batchInterval: (Default: 5000 ms) Value indicating the number of milliseconds to wait before sending the HTTP request
   //batchCount: (Default: 10) Value indicating the number of logs to cumulate before sending the HTTP request
-
-  return {path: '/sneaker-logger-api/server/logs', format: winston.format.json()};
+  const path = options.path;
+  return {path, format: winston.format.json(), port: options.port || DEFAULT_PORT};
 }
 
-function logFileRowFormat({//info =>
+function logFileRowFormat({
   level,
   message,
   label,

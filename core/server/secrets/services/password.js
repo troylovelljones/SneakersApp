@@ -4,29 +4,29 @@ const NODE_ENV = process.env.NODE_ENV || 'production';
 const { getSecrets } = require('../model/secrets');
 const { compare, hash } = require('bcrypt');
 const { throwError } = require('../../../validation/validation');
-const { log, error, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const { info, error, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 const { getUserId } = require('../../../../core/server/user/service/user');
 
 
 
 const encryptPassword = async (password) => {
   try {
-    process.env.NODE_ENV != 'production' && log(password);
+    process.env.NODE_ENV != 'production' && info(password);
     const encryptedPassword = await hash(password, 12);
     return encryptedPassword;
   } catch (e) {
-    error(JSON.stringify(e));
-    error(JSON.stringify(e.stack));
-    error('Error encrptying password');
+      error(JSON.stringify(e));
+      error(JSON.stringify(e.stack));
+      error('Error encrptying password');
   }
 };
 
 const generateAndEncryptPassword = async () => {
-  log('Creating a fresh password.');
+  info('Creating a fresh password.');
   const Secrets = await getSecrets();
   const password = Secrets.generateSecret();
   const encryptedPassword = await encryptPassword(password);
-  log(
+  info(
     `New password: ${password}, new encrypted password: ${encryptedPassword}`
   );
   return { password, encryptedPassword };
@@ -35,23 +35,23 @@ const generateAndEncryptPassword = async () => {
 const getEncryptedPassword = async (identifier) => {
   try {
     const Secrets = await getSecrets();
-    log(`identifier = ${JSON.stringify(identifier, null, 2)}.`);
-    console.log(identifier.serverId);
-    log(`server id = ${serverId}`);
-    log(`username = ${username}.`);
+    info(`identifier = ${JSON.stringify(identifier, null, 2)}.`);
+    info(identifier.serverId);
+    info(`server id = ${serverId}`);
+    info(`username = ${username}.`);
     const id = (username && await getUserId(username)) || serverId;
-    log('Getting encrypted password for ' + (username || serverId));
+    info('Getting encrypted password for ' + (username || serverId));
     const secretKey = await Secrets.locateSecretsById(id);
-    log('Got the secret key');
-    log(JSON.stringify(secretKey, null, 2));
+    info('Got the secret key');
+    info(JSON.stringify(secretKey, null, 2));
     if (secretKey) {
       const { password: encryptedPassword } = secretKey;
       const secret = (id, encryptedPassword);
-      log('id = ');
-      log(id);
+      info('id = ');
+      info(id);
       NODE_ENV != 'production' &&
-        log('Encrypted Password = ') &&
-        log(encryptedPassword);
+        info('Encrypted Password = ') &&
+        info(encryptedPassword);
       return secret;
     } else return null;
   } catch(e) {
@@ -63,29 +63,29 @@ const getEncryptedPassword = async (identifier) => {
 const saveEncryptedPassword = async (id, password) => {
   try {
     const Secrets = await getSecrets();
-    Secrets && log('Secrets loaded.');
-    log(`Save encryptedPassword() id = ${id}`);
+    Secrets && info('Secrets loaded.');
+    info(`Save encryptedPassword() id = ${id}`);
     const result = await Secrets.saveSecrets(id, { password });
-    log('Saved encrypted password.');
-    log('Secret: '.blue);
-    log(result);
+    info('Saved encrypted password.');
+    info('Secret: '.blue);
+    info(result);
     return result;
   } catch (e) {
-    error(JSON.stringify(e));
-    error(JSON.stringify(e));
-    error('Error saving password!');
+      error(JSON.stringify(e));
+      e?.stack && error(JSON.stringify(e.stack));
+      error('Error saving password!');
   }
 };
 
 const validatePassword = async (id, password) => {
   const Secrets = await getSecrets();
-  log(`Searching for secrets related to ${id}.`)
+  info(`Searching for secrets related to ${id}.`)
   let result = await Secrets.locateSecretsById(id);
-  log(`Encrypted password = ${result}.`);
+  info(`Encrypted password = ${result}.`);
   if (!result) return false;
-  log(`Comparing ${password} to ${result.password}.`);
+  info(`Comparing ${password} to ${result.password}.`);
   result = await compare(password, result.password);
-  result && log('Password matched!') || log('Password failed to match!');
+  result && info('Password matched!') || info('Password failed to match!');
   return true;
 };
 

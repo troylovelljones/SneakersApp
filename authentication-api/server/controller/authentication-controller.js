@@ -14,11 +14,12 @@ const HOST_IP_ADDRESS = require('../../../core/development/dev-constants').HOST_
 const REGISTRATION_SERVER_URL = process.env.REGISTRATION_URL || devConstants.REGISTRATION_SERVER_URL;
 const REGISTER_SERVER_URL = process.env.REGISTER_SERVER_URL || devConstants.REGISTER_SERVER_URL;
 const REGISTRATION_URL = REGISTRATION_SERVER_URL + REGISTER_SERVER_URL;
+const SERVER_NAME = process.env.SERVER_NAME || 'auth-api-svr';
 
 const { getUserId } = require('../../../core/server/user/service/user')
 const { updateModuleLoggingMetaData } = require('../../../logging/logger/logger-manager');
 const { createAndSaveTokens, generateNewPassword, validatePassword, validateToken } = require('../services/authentication-services');
-const { error, log, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
+const { error, info, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
 
 module.getDependencies = () => dependencies;
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
@@ -32,42 +33,42 @@ module.exports = {
   authenticateServer: async (req, res) => {
     const clientIp = req.ip.split('::ffff:')[1];
     const traceId = req.traceId;
-    log(`Request trace id = ${traceId}`);
+    info(`Request trace id = ${traceId}`);
     const phase = clientIp === HOST_IP_ADDRESS ? 'startup' : 'ready';
     updateModuleLoggingMetaData(module, { clientIp, traceId, phase });
-    log('<------------------REQUEST RECIEVED---------------->.'.cyan);
+    info('<------------------REQUEST RECIEVED---------------->.'.cyan);
     try {
-      log('Logging configuration');
-      log(JSON.stringify(getModuleLoggingMetaData()));
-      log('<------------START OF authenticateServer() ------>.'.gray);
-      log('Authentication request recieved.');
+      info('Logging configuration');
+      info(JSON.stringify(getModuleLoggingMetaData()));
+      info('<------------START OF authenticateServer() ------>.'.gray);
+      info('Authentication request recieved.');
       const skipAuthentication = await config.getValueFromConfigFile('SKIP_AUTHENTICATION');
       const refreshPassword = await config.getValueFromConfigFile('REFRESH_PASSWORD');
-      log(`Skip authentication = ${skipAuthentication}`);
-      log(`Refresh Password = ${refreshPassword}`);
+      info(`Skip authentication = ${skipAuthentication}`);
+      info(`Refresh Password = ${refreshPassword}`);
       const { serverId , password } = req.body;
       if (!serverId) return res.status(401).send('Missing server id!');
-      NODE_ENV !='production' && log(`serverId = ${serverId}, password = ${password}`);
+      NODE_ENV !='production' && info(`serverId = ${serverId}, password = ${password}`);
       const validPassword = skipAuthentication || await validatePassword(serverId, password);
       if (!validPassword) return res.status(401).send(`Missing creditials for ${serverId}!`);
-      const newPassword = refreshPassword && log('generating a new password') && await generateNewPassword(serverId);
-      const tokens = log('Creating access tokens.') && await createAndSaveTokens(serverId, ACCESS_TOKEN_DURATION);
-      log(`Server ${serverId} authorized!`);
-      log('Resetting clientIp and phase logging metadata');
+      const newPassword = refreshPassword && info('generating a new password') && await generateNewPassword(serverId);
+      const tokens = info('Creating access tokens.') && await createAndSaveTokens(serverId, ACCESS_TOKEN_DURATION);
+      info(`Server ${serverId} authorized!`);
+      info('Resetting clientIp and phase logging metadata');
       updateModuleLoggingMetaData(module, {clientIp: null, phase: 'ready'});
       NODE_ENV !== 'production' && 
-        log(`New secret = ${newPassword}.`) && 
-        log(`Tokens = ${JSON.stringify(tokens)}.`) &&
-        log(`TraceId = ${traceId}.`);
+        info(`New secret = ${newPassword}.`) && 
+        info(`Tokens = ${JSON.stringify(tokens)}.`) &&
+        info(`TraceId = ${traceId}.`);
 
-      res.status(200).send(newPassword && log('Sending new password') && { newPassword, tokens, traceId, registrationUrl: REGISTRATION_URL } || { tokens, traceId, registrationUrl: REGISTRATION_URL });
+      res.status(200).send(newPassword && info('Sending new password') && { newPassword, tokens, traceId, registrationUrl: REGISTRATION_URL } || { tokens, traceId, registrationUrl: REGISTRATION_URL });
       //try not to add any code that could cause an error after saving the new password/tokens and before sending the response  
-      log('Authorization complete, data sent.');
-      log('<----------END OF authenticateServer()---------->');
-      log('<------------------RESPONSE SENT----------------->.'.green);
+      info('Authorization complete, data sent.');
+      info('<----------END OF authenticateServer()---------->');
+      info('<------------------RESPONSE SENT----------------->.'.green);
   
     } catch (e) {
-        error(e.stack);
+        error(`${JSON.stringify(e.stack, null, 2)}`);
         !res.headersSent && res.status(500).send('Server Error!');
     }
   },
@@ -82,7 +83,7 @@ module.exports = {
       //if not deny access to the route
       if (!payload || !payload.admin) return res.sendStatus(403);
       res.token = payload;
-      log('Token authenticated.');
+      info('Token authenticated.');
       return res.status(200).send('Authorized');
     } catch (e) {
       error(e);
@@ -92,29 +93,29 @@ module.exports = {
 
   authenticateUser: async (req, res) => {
     try {
-      log(`The request body = ${JSON.stringify(req.body, null, 2)}`);
+      info(`The request body = ${JSON.stringify(req.body, null, 2)}`);
 
-      log('Authentication request recieved.');
+      info('Authentication request recieved.');
       const { username, password } = req.body;
-      log(`username = `);
-      log(username);
+      info(`username = `);
+      info(username);
       NODE_ENV != 'production' && !
-        log(`password = `) &&
-        log(password);
+        info(`password = `) &&
+        info(password);
       const id = await getUserId(username);
       const valid = await validatePassword(id, password);
-      log(`Authenticating User ${id}`);
-      log(`Valid = ${valid}`);
+      info(`Authenticating User ${id}`);
+      info(`Valid = ${valid}`);
       if (!valid) {
-        log('Invalid credentials.'.red);
+        info('Invalid credentials.'.red);
         return res.status(401).send('Unauthorized Access.');
-      } else log('Credentials are valid.'.green);
+      } else info('Credentials are valid.'.green);
       if (!id) return res.status(401).send('User is not registered.');
       //save the new token secrets that were generated when creating the token
       const tokens = await authenticationService.createAndSaveTokens(id);
       //save the new token secrets that were generated when creating the token
-      log(`User ${id} authorized!`);
-      log('----RESPONSE SENT----.'.green);
+      info(`User ${id} authorized!`);
+      info('----RESPONSE SENT----.'.green);
       return res.status(200).send({ message: 'success', statusCode: 200,  tokens }); //this needs to be the last line, otherwise exception handling will generate an unhandled exception
      
     } catch (e) {
@@ -129,9 +130,9 @@ module.exports = {
       const token = req.query.token;
       const type = req.query.type;
       const id = req.query.id;
-      log('Refreshing token = ');
-      log(token);
-      log(`For id: ${id}`);
+      info('Refreshing token = ');
+      info(token);
+      info(`For id: ${id}`);
       const { accessTokenSecret, refreshTokenSecret } =
         await token.getTokenSecretsById(id);
       const secret =
@@ -140,7 +141,7 @@ module.exports = {
       const newToken = payload ? await createTokens(id) : null;
       newToken && (await saveSecrets(id, newToken, newToken.refreshToken));
       res.set('Authorization', `Bearer ${token.jwt}`);
-      log(`Sending new token ${newToken.jwt}.`);
+      info(`Sending new token ${newToken.jwt}.`);
       return res.status(200).send(newToken);
     } catch (e) {
       error(JSON.stringify(e));

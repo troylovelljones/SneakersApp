@@ -1,6 +1,6 @@
 "use strict";
 
-const logEntriesService = require('../repository/model/log-entries');
+const logEntriesModel = require('../repository/model/log-entries/log-entries');
 
 const saveLogEntriesToFile = async (logEntries) => {
     return 'Not Implemented Yet'
@@ -8,7 +8,7 @@ const saveLogEntriesToFile = async (logEntries) => {
 }
 
 const saveLogEntriesToMongoDB = async (logEntries) => {
-    await logEntriesService.saveLogEntries(logEntries);
+    await logEntriesModel.saveLogEntries(logEntries);
 }
 
 module.exports = {
@@ -18,6 +18,6 @@ module.exports = {
     },
     
     getLogEntries: async () => {
-        return await logEntriesService.getLogEntries();
+        return await logEntriesModel.getLogEntries();
     }
 }

@@ -20,19 +20,19 @@ const {
   BAD_USER_INFO
 } = require('../../../core/validation/validation');
 const { getRegistry } = require('../model/registry')
-const { log, error, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
+const {error, info } = require('../../../logging/logger/global-logger')(module);
 const siteRegistrationEmail = require('../../email/site-registration-email');
 
 const findUser = async (username) => {
   try {
-    log('<----------Start findUser()---------->');
+    info('<----------Start findUser()---------->');
     const result = await getSneakerUserByUserName(username.toLowerCase());
-    log(`Searching for user = ${username}.  Result = `);
-    log(result)
+    info(`Searching for user = ${username}.  Result = `);
+    info(result)
     const record = result.next().value;
-    record && log(USERNAME_EXISTS);
-    log(JSON.stringify(record, null, 2));
-    log('<----------End findUser()---------->');
+    record && info(USERNAME_EXISTS);
+    info(JSON.stringify(record, null, 2));
+    info('<----------End findUser()---------->');
     return record;
   } catch (e) {
     error(e);
@@ -42,25 +42,25 @@ const findUser = async (username) => {
  
 //---------this all needs to be replaced with JOI-------------//
 const isValidUserInfo = (username, email, password) => {
-  log(username, email, password);
+  info(username, email, password);
   const validUsername =
-    new RegExp(VALID_USER_NAME).test(username) || log('Bad Username!');
-  const validEmail = RegExp(VALID_EMAIL).test(email) || log('Bad Email!');
+    new RegExp(VALID_USER_NAME).test(username) || info('Bad Username!');
+  const validEmail = RegExp(VALID_EMAIL).test(email) || info('Bad Email!');
   const validPassword =
-    new RegExp(STRONG_PASSWORD).test(password) || log('Bad Password!');
+    new RegExp(STRONG_PASSWORD).test(password) || info('Bad Password!');
   const validRegistration = validUsername && validEmail && validPassword;
   return validRegistration;
 };
  
 const registerServer = async (serverInfo) => {
   try {
-    log('<----------Start registerServer() on the Registry Server---------->');
-    log('Server Info: ');
-    log(JSON.stringify(serverInfo));
+    info('<----------Start registerServer() on the Registry Server---------->');
+    //log('Server Info: ');
+    //log(JSON.stringify(serverInfo, null, 2));
     const { name, ipAddress, port, endPoints, status, serverId } = serverInfo;
     const Registry = await getRegistry();
     const result = await Registry.saveEntry(name, ipAddress, port, endPoints, status, serverId);
-    log('<----------End registerServer() on the Registery Server---------->');
+    info('<----------End registerServer() on the Registery Server---------->');
     return {status: 200, message: `Sucessfully registered server ${name}:${ipAddress}`, _id: result._id};
   } catch (e) {
       error(e);
@@ -70,37 +70,37 @@ const registerServer = async (serverInfo) => {
 };
  
 const registerUser = async (username, password, emailAddress) => {
-  log('<----------Start registerUser() on the Registery Server---------->');
-  log(`Request for Registration recieved at ${new Date()}`);
+  info('<----------Start registerUser() on the Registery Server---------->');
+  info(`Request for Registration recieved at ${new Date()}`);
  
   const userExists = await findUser(username);
   if (userExists) {
-    log(USERNAME_EXISTS);
+    info(USERNAME_EXISTS);
     return { status: 400, message: USERNAME_EXISTS };
   }
  
   const validUserInfo = isValidUserInfo(username, emailAddress, password);
   if (!validUserInfo) {
-    log('Bad user info!');
+    info('Bad user info!');
     return { status: 400, message: BAD_USER_INFO };
   }
  
-  log(`-Registering User ${username}`);
-  log(`- Register user payload = username: ${username}, password: ${password}, email:  ${emailAddress}`);
+  info(`-Registering User ${username}`);
+  info(`- Register user payload = username: ${username}, password: ${password}, email:  ${emailAddress}`);
   const ePassword = await hash(password, 12);
-  NODE_ENV !== 'production' && log(`-Password: ${password} encrypted as ` + `${ePassword}`);
+  NODE_ENV !== 'production' && info(`-Password: ${password} encrypted as ` + `${ePassword}`);
   try {
     await startTransaction();
-    log('Starting Transaction.');
+    info('Starting Transaction.');
     const userId = await insertSneakerUser(user);
     await saveEncryptedPassword({ userId }, ePassword);
-    log(`Successful Registration for ${username} at ${new Date()}`);
+    info(`Successful Registration for ${username} at ${new Date()}`);
     //send the user a nice registration email through Sendinblue
-    log('Sending registration email.');
+    info('Sending registration email.');
     siteRegistrationEmail.send(username, emailAddress);
     await commit();
-    log('Commiting Transation.');
-    log('<----------End registerUser() on the Registery Server---------->');
+    info('Commiting Transation.');
+    info('<----------End registerUser() on the Registery Server---------->');
     return { userId, status: 200, message: `Registration of ${username} Successful`};
   } catch (e) {
       error(`-Registration error`.red);

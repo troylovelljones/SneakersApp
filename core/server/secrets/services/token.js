@@ -7,31 +7,31 @@ const REFRESH_TOKEN_LIFE = process.env.REFRESH_TOKEN_LIFE || '7d';
 const { getSecrets } = require('../model/secrets');
 const { sign, verify } = require('jsonwebtoken');
 const { throwError } = require('../../../validation/validation');
-const { log, error, getModuleLoggingMetaData } =
+const { info, error, getModuleLoggingMetaData } =
   require('../../../../logging/logger/global-logger')(module);
 
 const authenticateTokenAsync = async (token, secret) => {
   return await new Promise((resolve, reject) => {
     try {
-      log('<----------Start of authenticateTokenAsync()---------->'.cyan);
-      log('Token parameter = ');
-      log(token);
-      log('Database secret parameter = ');
-      log(secret);
+      info('<----------Start of authenticateTokenAsync()---------->'.cyan);
+      info('Token parameter = ');
+      info(`${JSON.stringify(token)}`);
+      info('Database secret parameter = ');
+      info(secret);
       !secret && throwError('HTTP 401 Unauthorized.');
-      log('Validating token inside promise...');
-      log('Token = ');
-      log(JSON.stringify(token, null, 2));
-      log('Secret = ');
-      log(JSON.stringify(secret));
+      info('Validating token inside promise...');
+      info('Token = ');
+      info(`${JSON.stringify(token, null, 2)}`);
+      info('Secret = ');
+      info(`${JSON.stringify(secret, null, 2)}`);
       const payload = verify(token, secret);
-      log('Payload.');
-      log(JSON.stringify(payload));
+      info('Payload.');
+      info(`${JSON.stringify(payload, null, 2)}`);
       payload ? resolve(payload) : throwError('HTTP 401 Unauthorized.');
-      log('<----------end of authenticateTokenAsync()---------->'.cyan);
+      info('<----------end of authenticateTokenAsync()---------->'.cyan);
     } catch (e) {
-      e && error(JSON.stringify(e));
-      e.stack && error(JSON.stringify(e.stack));
+      e && error(`${JSON.stringify(e, null, 2)}`);
+      e.stack && error(`${JSON.stringify(e.stack, null, 2)}`);
       reject(new Error('Invalid Token'));
     }
   });
@@ -40,7 +40,7 @@ const authenticateTokenAsync = async (token, secret) => {
 //this method attaches the secret used to create the token
 //the secret MUST be deleted from the object before sending to the client
 const createTokenAsync = async (id, tokenType, expiration) => {
-  log('Generating token secret.');
+  info('Generating token secret.');
   const Secrets = await getSecrets();
   const secret = Secrets.generateSecret();
   if (!expiration) {
@@ -64,16 +64,16 @@ const createTokenAsync = async (id, tokenType, expiration) => {
     }
     const token = { jwt: signedPayload, secret, tokenType, id };
     resolve(token);
-    log('Token created.  Token = ');
-    log(JSON.stringify(token));
-    log('Secret = ');
-    log(JSON.stringify(secret));
+    info('Token created.  Token = ');
+    info(`${JSON.stringify(token)}`);
+    info('Secret = ');
+    info(`${JSON.stringify(secret)}`);
   });
 };
 
 const deleteTokenSecrets = (tokens) => {
   for (const token of tokens) delete token.secret;
-  log('Deleting secrets deleted.');
+  info('Deleting secrets deleted.');
 };
 
 const getTokenSecretsById = async (id) => {
@@ -89,7 +89,7 @@ const getTokenSecretsById = async (id) => {
 };
 
 const saveRefreshTokenAsync = async (token, id) => {
-  log('<----------Start of saveTokensAsync()---------->');
+  info('<----------Start of saveTokensAsync()---------->');
   const Secrets = await getSecrets();
   try {
     const result = await Secrets.saveSecret(
@@ -97,10 +97,10 @@ const saveRefreshTokenAsync = async (token, id) => {
       id,
       'Refresh Token'
     );
-    log('<----------End of saveTokensAsync()---------->');
+    info('<----------End of saveTokensAsync()---------->');
     return result;
   } catch (e) {
-    error(JSON.stringify(e));
+    error(`${JSON.stringify(e, null, 2)}`);
     error('Could not save secret!');
   }
 };
@@ -108,25 +108,25 @@ const saveRefreshTokenAsync = async (token, id) => {
 const saveTokensAsync = async (id, tokens) => {
   try {
     const Secrets = await getSecrets();
-    log('<----------Start of saveTokensAsync()---------->');
-    Secrets && log('Secrets loaded.');
-    log('Tokens - saveTokensAsync: ');
+    info('<----------Start of saveTokensAsync()---------->');
+    Secrets && info('Secrets loaded.');
+    info('Tokens - saveTokensAsync: ');
     const { accessToken, refreshToken } = tokens;
-    log(JSON.stringify(accessToken));
-    log(JSON.stringify(accessToken));
+    info(`${JSON.stringify(accessToken, null, 2)}`);
+    info(`${JSON.stringify(accessToken, null, 2)}`);
     //validate tokens before they are saved to the database
     accessToken && (await authenticateTokenAsync(accessToken.jwt, accessToken.secret));
     refreshToken && (await authenticateTokenAsync(refreshToken.jwt, refreshToken.secret));
-    log(tokens);
+    info(`${JSON.stringify(tokens, null, 2)}`);
     const result = await Secrets.saveSecrets(id, tokens);
-    log('Saved secret.');
-    log('Secret: '.blue);
-    log(result);
-    log('Delete token secrets.');
+    info('Saved secret.');
+    info('Secret: '.blue);
+    info(`${JSON.stringify(result, null,2)}`);
+    info('Delete token secrets.');
     //delete the token secret;
     deleteTokenSecrets([accessToken, refreshToken]);
-    log('Deleted.');
-    log('<----------End of saveTokensAsync()---------->');
+    info('Deleted.');
+    info('<----------End of saveTokensAsync()---------->');
     return result;
   } catch(e) {
     error('Error saving tokens');

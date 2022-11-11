@@ -11,3 +11,8 @@ sneakers/.DS_Store
 security/client/login/.DS_Store
 security/server/api/.env
 sneakers/server/.DS_Store
+logs-api/server/.cfg
+authentication-api/server/.cfg
+.DS_Store
+logs-api/server/.cfg
+registration-api/server/.cfg

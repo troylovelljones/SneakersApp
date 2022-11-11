@@ -1,44 +1,47 @@
 'use strict';
 
-const axios = require('axios');
-const cors = require('cors');
 const colors = require('colors');
-const env = require('dotenv').config();
 const express = require('express');
-const app = express();
 const { resolve } = require('path');
+
+const app = express();
 const appServices = require('../../core/server/app/services/app-services');
 const configFile = require('../../config/config-file').getConfigFile(resolve(__dirname, '.cfg'));
 const devConstants = require('../../core/development/dev-constants');
-const { getModuleDependencies } = require('../../core/server/utils/app-utils');
-const getRouter = require('./routes/unprotected-routes/router');
-const getProtectedRouter = require('./routes/protected-routes/router');
-const { throwError } = require('../../core/validation/validation');
+const hostIpAddress = require('../../core/server/utils/host-ip');
 
-//logging setup
-const { log, error, getModuleLoggingMetaData } = require('../../logging/logger/global-logger')(module);
-const { startTrace, stopTrace } = require('../../logging/logger/tracer');
+//Routers/Middleware
+const { authorizationMiddlewareList } = require('../../core/server/middleware/authorization/authorize-routes');
+const getProtectedRouter = require('./routes/protected-routes/router');
+const getRouter = require('./routes/unprotected-routes/router');
+const generateTraceId = require('../../core/server/middleware/logging/generate-trace-info');
+const { requestCount } = require('../../core/server/middleware/requestCounter');
+
 //environment variables
+const env = require('dotenv').config();
 const NODE_ENV = process.env.NODE_ENV || 'production';
 const AUTHENTICATE_URL = process.env.AUTH_URL || devConstants.AUTH_URL + (process.env.AUTH_SERVER_URL || devConstants.AUTH_SERVER_URL);
-const HOST_IP_ADDRESS = require('../../core/server/utils/host-ip') + (NODE_ENV === 'development' && log('Generated a random ip addres for testing.') && devConstants.randomIpTuple() || '');
 const PORT = process.env.PORT || 4500;
 const REGISTRATION_SERVER_URL = process.env.REGISTRATION_SERVER_URL || devConstants.REGISTRATION_SERVER_URL;
 const REGISTER_SERVER_URL = process.env.REGISTER_SERVER_URL || devConstants.REGISTER_SERVER_URL;
 const REGISTRATION_URL = REGISTRATION_SERVER_URL + REGISTER_SERVER_URL;
-const SERVER_ID = process.env.SERVER_ID || HOST_IP_ADDRESS;
+const SERVER_ID = process.env.SERVER_ID || hostIpAddress;
 const SERVER_NAME = process.env.APP_NAME || 'registration-api-server';
 
-const { authorizationMiddlewareList } = require('../../core/server/middleware/authorization/authorize-routes');
-const generateTraceId = require('../../core/server/middleware/logging/generate-trace-info');
+//logging
+const { error, getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
+const { startTrace, stopTrace } = require('../../logging/logger/tracer');
+const { updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
+
+const { throwError } = require('../../core/validation/validation');
+
+const { getModuleDependencies, waitFor } = require('../../core/server/utils/app-utils');
 const dependencies = Array.from(getModuleDependencies(module));
-const { requestCount, getRequestCount } = require('../../core/server/middleware/requestCounter');
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
 module.getDependencies = () => dependencies;
-log(`Running node in ${NODE_ENV} mode.`);
-log(`Environment variables ${JSON.stringify(env, null, 2)}`);
-log('Launching server.');
-log(`IP address = ${HOST_IP_ADDRESS}`);
+
+info(`Running node in ${NODE_ENV} mode.`);
+info(`IP address = ${hostIpAddress}`);
 
 const authenticate = async (password, traceId) => {
   const authInfo = {
@@ -47,20 +50,24 @@ const authenticate = async (password, traceId) => {
     serverId: SERVER_ID,
     traceId
   }
-  const result = await appServices.authenticateServer(AUTHENTICATE_URL, authInfo);
-  const secrets = result.data;
-  const { token } = secrets;
-  log('Access token = ');
-  log(token);
-  return secrets;
+  const { data: response } = await appServices.authenticateServer(
+    AUTHENTICATE_URL,
+    authInfo
+  );
+  info(`${SERVER_NAME} authenticated.`.green.bold);
+  const { tokens, newPassword } = response;
+  info('Access token = ');
+  info(`${JSON.stringify(tokens, null, 2)}`);
+  NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
+  return response;
 };
 
 const configureMiddleware = async () => {
   const protectedRouter = await getProtectedRouter();
-  (protectedRouter && log('Protected routes retrieved.'.green)) ||
+  (protectedRouter && info('Protected routes retrieved.'.green)) ||
     throwError('Routes were not retrieved!');
   const unProtectedRouter = await getRouter();
-  (protectedRouter && log('Unprotected routes retrieved.'.green)) ||
+  (unProtectedRouter && info('Unprotected routes retrieved.'.green)) ||
   throwError('Routes were not retrieved!');
   appServices.installDefaultMiddleware(app);
   app.use(requestCount);
@@ -70,81 +77,70 @@ const configureMiddleware = async () => {
   app.use(protectedRouter); //protected Routes
 } 
 
-const processResponseData = (data, regType) => {
-  !data && throwError(`${regType} unsuccessful!`);
-  log(`${regType} successful.`.green);
-};
-
 //self registration
 const register = async (token, traceId) => {
   try {
     const serverInfo = {
       name: SERVER_NAME,
-      ipAddress: HOST_IP_ADDRESS,
+      ipAddress: hostIpAddress + (NODE_ENV === 'development' && 
+        info('Generated a random ip addres for testing.') && 
+        devConstants.randomIpTuple() || ''),
       port: PORT,
       endPoints: appServices.getRoutingInformation(app),
       serverId: SERVER_ID,
       traceId
     };
-    log('Sending server information to registry service.');
-    log(serverInfo);
+    info('Sending server information to registry service.');
+    info(`${JSON.stringify(serverInfo, null, 2)}`);
+    info(`Attempting to communicate with registration server at ${REGISTRATION_SERVER_URL}`);
     const response = await appServices.registerServer(
       REGISTRATION_URL,
       serverInfo,
       token
     );
-    log('Registration Response:');
-    log(response);
-    processResponseData(response.data, 'Registration');
+    !response && throwError('No response from server!');
+    info(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`);
+    info('Registration Response:');
+    info(`${JSON.stringify(response.data, null, 2)}`);
     const { id } = response.data;
+    id && info(`Saving server id.`) && await config.saveValueToConfigFile('SERVER_ID', id);
     app.id = id;
     return response.data;
   } catch (e) {
       error('We got an error in register().');
-      error(e);
-      e.stack && error(e.stack);
-      throwError('Register error.');
-  }
-};
-
-//taking server offline, set satus to unavailable
-const unregister = async (registrationUrl, id) => {
-  const body = {};
-  body.id = id;
-  body.status = 'Unavailable';
-  try {
-    log(`Unregistering server at ${registrationUrl}`.magenta);
-    return await axios.put(`${registrationUrl}`, body);
-  } catch (e) {
-    e.stack && error(e.stack);
-    error('unregister() error.  Could not update data to registration server!');
-    return false;
+      throw e;
   }
 };
 
 (async () => {
-
     try {
-        await configureMiddleware();
-        const traceId = startTrace(module);
-        const password = await configFile.getValueFromConfigFile('PASSWORD');
-        !password && throwError('Server configuration file is missing or invalid!');
-        // <---------------AUTHENTICATION--------------->
-        const { secret: newPassword, tokens } = await authenticate(password, traceId);
-        log('Authentication successful!');
-        newPassword ? await configFile.saveValueToConfigFile('PASSWORD', newPassword.password) && log('A new pasword was saved to config file') : log('Server password was not changed.'); 
-        const httpServer = await appServices.startApp(app, SERVER_NAME, PORT);
-        appServices.onAppTermination(httpServer, HOST_IP_ADDRESS, REGISTRATION_URL, tokens.accessToken);
-        log(`Tokens =  ${JSON.stringify(tokens)}`);
-        // <---------------REGISTRATION----------------->
-        await register(tokens.accessToken, traceId);
-        log(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`)
-        stopTrace(module, traceId);
+      info('Environment Variables');
+      info(`${JSON.stringify(env, null, 2)}`);
+      await configureMiddleware();
+      const traceId = startTrace(module);
+      const password = await configFile.getValueFromConfigFile('PASSWORD');
+      !password && throwError('Server configuration file is missing or invalid!');
+      // <---------------AUTHENTICATION--------------->
+      const { newPassword, tokens } = await authenticate(password, traceId);
+      newPassword ? await configFile.saveValueToConfigFile('PASSWORD', newPassword.password) && info('A new pasword was saved to config file') : info('Server password was not changed.'); 
+      const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
+      !started && throwError('Authentication server could not be started');
+      appServices.onAppTermination(httpServer, hostIpAddress, REGISTRATION_URL, tokens.accessToken);
+      info(`Tokens =  ${JSON.stringify(tokens)}`);
+      // <---------------REGISTRATION----------------->
+      await register(tokens.accessToken, traceId);
+      updateModuleLoggingMetaData(module, { phase:'ready' });
+      stopTrace(module, traceId);
       // <------------SERVER START UP DONE------------->
     } catch (e) {
-      console.log(e);
-      error(e.stack);
-      error('Error starting server!  Check the configuration and .env files for errors!'); 
-      process.exit();
+        error(`${JSON.stringify(e, null, 2)}`);
+        error(`${JSON.stringify(e.stack, null, 2)}`);
+        error('<----------Error condition triggered, error caught, server will not reattempt, shutting down---------->');
+        error('Could not start registration-app-server');
+        //Give the logger time to log the errors before shutting down the server
+        await waitFor(2000);
+        process.exit();
         
     }})();
+    
+    module.exports = { getModuleLoggingMetaData }

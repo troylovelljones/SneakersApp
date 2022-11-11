@@ -1,10 +1,10 @@
 "use strict";
 
-const createApp = require('../test/base-app')
-const app = createApp;
+//const createApp = require('../test/base-app')
+//const app = createApp;
 
 //try to call gotcha
-app.gotcha(); //this code will not run
+//app.gotcha(); //this code will not run
 
 /*
 TypeError: app.gotcha is not a function
@@ -16,3 +16,7 @@ TypeError: app.gotcha is not a function
     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)
     at node:internal/main/run_main_module:17:47
 */
+
+let x;
+
+console.log(x++);

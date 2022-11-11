@@ -18,13 +18,13 @@ module.exports = {
      randomIpTuple: () => ('.' + Math.ceil(Math.random() * 255)),
      REGISTRATION_SERVER_URL: 'http://localhost:4500/registration-api-server',
      REGISTRATION_URL: 'http://localhost:4500/registration-api-server',
-     RETRY_DURATION: 3000,
      REGISTER_SERVER_URL: '/register/server',
      REGISTER_USER_URL: '/register/user',
      REFRESH_TOKEN_DURATION: '1d',
      REFRESH_TOKEN_URL: 'refreshToken?token=%TOKEN&type=%TYPE&id=%ID', 
      SKIP_AUTHORIZATION: true,
      TIMEOUT: 5000, 
+     TRY_DURATION: 3000
     
 }
 
