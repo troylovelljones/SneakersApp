@@ -18,12 +18,29 @@ let registryServerUrl = '';
 const { info, error, warn, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 
 /**
+ * A promise for the user's favorite color.
+ *
+ * @promise EndpointArrayPromise
+ * @fulfill {Array.<String>} The user's favorite color.
+ * @reject {TypeError} The user's favorite color is an invalid type.
+ * @reject {MissingColorError} The user has not specified a favorite color.
+ */
+
+/**
+ * Retrieve the user's favorite color.
+ *
+ * @returns {FavoriteColorPromise} A promise for the user's favorite color.
+ */
+
+
+/**
   * This function authenicates the Express app with the authentication server.
   * 
   * @author Troy Lovell Jones
   * @param {String} authUrl - The URI for the authenication service.
   * @param {{name: String, serverId: number, password: String, traceId: number}} authInfo Authentication infornmation for the server.
-  * @returns {Array.<String>} The list of endpoints/middleware registered on the app.
+  * @returns {Promise<Array<String>} The list of endpoints/middleware registered on the app.
+  * 
   */
 async function authenticateServer(authUrl, authInfo) {
   const { name, serverId, password, traceId } = authInfo;
@@ -176,7 +193,7 @@ let tries;
   * @param {String} registationUrl - The URI where the registration service can be reached.
   * @param {Object} regInfo - This is the information that must be supplied to the registration service.
   * @param {Object} token - This is the JWT token required to access the registration service.
-  * @returns {Object} - The response from the HTTP call to the registration service.
+  * 
   */
 async function registerServer(registrationUrl, regInfo, token) {
   tries = 1;

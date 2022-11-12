@@ -1,15 +1,30 @@
 'use strict';
 
+require('colors');
+
 const winston = require('winston');
 const { createLogger, format, transports } = winston;
 const { colorize, combine, label, ms, printf, timestamp, prettyPrint } = format;
 const HOST_IP = require('../../core/server/utils/host-ip');
-const colors = require('colors');
-const env = require('dotenv').config();
-const DEFAULT_PORT = 4080;
+
 const loggers = new Map();
 const suspendLogging = [];
 
+//environment variables
+const env = require('dotenv').config();
+const DEFAULT_PORT = 4080;
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+
+/**
+  * This function will color a log message
+  * 
+  * @author Troy Lovell Jones
+  * @param {string} message The message to be logged.
+  * @param {string} stack String representing the stack trace
+  * @param {string} level Log level.
+  * @returns {string} - Message wih color specifiers added
+  * 
+  */
 function colorMessage (message, stack, level) {
   const error =
     Symbol.for(level) === Symbol.for('error'.red) ||
@@ -18,7 +33,7 @@ function colorMessage (message, stack, level) {
     Symbol.for(level) === Symbol.for('alert'.red);
   
   const warn = Symbol.for(level) === Symbol.for('warn'.yellow); 
-    //color the message in white if there is no error
+  //color the message in white if there is no error
   //if there is and error, message, and stack trace both message and stack trace return the stack trace and message colored in red 
   if (error && message && stack)
     return message.red + stack.red;
@@ -31,6 +46,15 @@ function colorMessage (message, stack, level) {
   return warn && message.yellow || message && message.white || ''; 
 };
 
+/**
+  * This function will create a new logger and add to the indexed list of loggers
+  *
+  * @author Troy Lovell Jones
+  * @param {string} moduleName The name of the module.
+  * @param {object} options List of options that affect the formatting of the message
+  * @returns {Map} - Map containing one or more loggers indexed by module
+  * 
+  */
 function create (moduleName, options) {
   
   options = options || {};
@@ -55,7 +79,8 @@ function create (moduleName, options) {
       ),
       defaultMeta: { module: moduleName, serverName: options.serverName },
       transports: [new transports.Console()],
-      exceptionHandlers: [new transports.Console()]
+      exceptionHandlers: [new transports.Console()],
+      level: LOG_LEVEL.toLowerCase()
     });
   logger.add(new winston.transports.Http(getHttpLoggerConfig(options)))
   loggers.set(moduleName, logger);
@@ -85,6 +110,14 @@ function getFormatter() {
   });
 }
 
+/**
+  * This function will create a configuration for a Http Transport
+  * 
+  * @author Troy Lovell Jones
+  * @param {object} options Http transport options
+  * @returns {object} - Object containing the http transport configuration
+  * 
+  */
 function getHttpLoggerConfig(options) {
 
   //host: (Default: localhost) Remote host of the HTTP logging endpoint
@@ -99,6 +132,19 @@ function getHttpLoggerConfig(options) {
   return {path, format: winston.format.json(), port: options.port || DEFAULT_PORT};
 }
 
+/**
+  * This function returns the formatted log message
+  * 
+  * @author Troy Lovell Jones
+  * @param {string} level Log level
+  * @param {string} message Log message
+  * @param {string} label Tag which will appear as part of the log message
+  * @param {string} timestamp Log timestamp
+  * @param {string} ms Time since last log message
+  * @param {string} module The node module where the log event occured
+  * @param {object} metaData An object containing metaData that affects the log message
+  * @returns {string} The formatted log message
+  */
 function logFileRowFormat({
   level,
   message,
@@ -133,10 +179,23 @@ function logFileRowFormat({
   return logFormat;
 }
 
+/**
+  * This function will prevent the supplied metadata from affecting the log
+  * 
+  * @author Troy Lovell Jones
+  * @param {Array} fields A list of metadata properties that should be ignored
+  * 
+  */
 const suspendLoggingMetaData = (fields = []) => {
   suspendLogging.push(...fields);
 }
 
+/**
+  * This function will undo the behavior of {@link suspendLoggingMetaData}.
+  * 
+  * @author Troy Lovell Jones
+  * 
+  */
 const resumeLoggingMetaData = () => {
   suspendLogging.length = 0;
 }

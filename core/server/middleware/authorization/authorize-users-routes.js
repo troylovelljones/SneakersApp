@@ -22,7 +22,7 @@ const authorizeUserRoutes = (req, res, next) => {
         info('Not a user route.');
         return next();
       }
-      info('<----------start of authorizeUsreRoute()---------->'.magenta);
+      info('<----------start of authorizeUsereRoute()---------->'.magenta);
       info(`Authorizing route ${req.url}.`.magenta, `:${clientIp}`);
       //look for token in one of three places
       // 1. authorization header

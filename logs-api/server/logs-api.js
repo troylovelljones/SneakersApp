@@ -1,5 +1,13 @@
 "use strict";
 
+/**
+  * This function will send quality metrics to a remote logging server.
+  * @author Troy Lovell Jones
+  * This module is responsible for launching the logging server and haandling
+  * data and saving it to the MongoDB remote datastore
+  * 
+  */
+
 const express = require('express');
 
 const { resolve } = require('path');
@@ -30,7 +38,7 @@ const { getModuleDependencies, waitFor } = require('../../core/server/utils/app-
 //logging
 const {error,  getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
 const { startTrace, stopTrace } = require('../../logging/logger/tracer');
-const { startSendingQualityMetrics, updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
+const {enableSendingQualityMetrics, updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
 
 
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
@@ -40,6 +48,14 @@ module.getDependencies = () => dependencies;
 
 env.error && throwError(env.error);
 
+
+/**
+  * 
+  * @author Troy Lovell Jones
+  * This function will authenticate the logging server
+  * @param {string} password
+  * @param {number} traceId
+  */
 const authenticate = async (password, traceId) => {
   const authInfo = { 
     name: SERVER_NAME, 
@@ -54,7 +70,7 @@ const authenticate = async (password, traceId) => {
   !response && throwError('No response from server!');
   info(`${SERVER_NAME} authenticated.`.green.bold);
   const { tokens, newPassword } = response;
-  info('Access token = ');
+  info('Session tokens = ');
   info(`${JSON.stringify(tokens, null, 2)}`);
   NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
   return response;
@@ -69,7 +85,18 @@ const configureMiddleware = async () => {
 
 } 
 
-//self registration
+/**
+  * 
+  * @author Troy Lovell Jones
+  * This function will register the logging server with the registry service
+  * @async
+  * @param {string} registrationUrl the URI where the registration server can be reached
+  * @param {Object} token
+  * @property {string} accessToken
+  * @property {string} jwt jwt access token for registration
+  * @param {string} traceId id for distributed tracing, telemetry
+  * @returns {Object} response object from registration server
+  */
 const register = async (registrationUrl, token, traceId) => {
   try {
     const serverInfo = {
@@ -106,8 +133,8 @@ const register = async (registrationUrl, token, traceId) => {
 };
 
 let metricsIntervalId; 
-const startLoggingMetrics = () => {
-  const id = startSendingQualityMetrics()
+const startSendingLoggingMetrics = (serverId, accessToken) => {
+  return enableSendingQualityMetrics(serverId, accessToken);
 }
 
 (async () => {
@@ -121,7 +148,9 @@ const startLoggingMetrics = () => {
     await getConnection();
     const db = info('Connecting to Mongo DB...') && await getConnection();
      // <---------------AUTHENTICATION--------------->
-     const { newPassword, registrationUrl, tokens } = await authenticate(password, traceId);
+    const { newPassword, registrationUrl, tokens } = await authenticate(password, traceId);
+    !tokens.accessToken && error('Unable to obtain an access token!') && throwError();
+    const intervalId = startSendingLoggingMetrics(SERVER_ID, tokens.accessToken);
     newPassword && info(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
     // <---------------REGISTRATION----------------->
     await register(registrationUrl, tokens.accessToken, traceId);

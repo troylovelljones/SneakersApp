@@ -12,7 +12,7 @@ const getHostName = () => {
 };
 
 const getDependencies = (targetModule, dependencies) => {
-    warn('Dependencies evaluated = '.white);
+    warn('Dependencies evaluated = ');
     warn(dependencies);
   //base condition - recurse until the nmodule parameter has no children
   if ((targetModule && targetModule.children.length < 1) || 
@@ -20,11 +20,9 @@ const getDependencies = (targetModule, dependencies) => {
     return dependencies;
   }
   for (const target of targetModule.children) {
-    if (target.filename.includes('node') || 
-      dependencies.has(target.filename) && 
-      warn(`Dependency for target ${getModuleName(target.filename)} already resolved.`.white)) 
+    if (target.filename.includes('node') || dependencies.has(target.filename) && warn(`Dependency for target ${getModuleName(target.filename)} already resolved.`)) 
       continue;
-    warn(`Parent: ` + getModuleName(targetModule.filename) + ' Child: '.white + getModuleName(target.filename));
+    warn(`Parent: ` + getModuleName(targetModule.filename) + ' Child: ' + getModuleName(target.filename));
     dependencies.add(target.filename);
     getDependencies(target, dependencies);  
   }

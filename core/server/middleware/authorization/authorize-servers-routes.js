@@ -24,7 +24,7 @@ const authorizeServerRoutes = (req, res, next) => {
   info(`Client ip address = ${clientIp}`);
   info('<----------start of authorizeServerRoute()---------->'.magenta);
   const skip = skipRequest(req.url);
-  info(`Authorizing route ${req.url}.`.magenta);
+  info(`Authorizing route ${req}.`.magenta);
   if (skip) {
     return next();
   };

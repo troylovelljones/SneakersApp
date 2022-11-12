@@ -41,13 +41,12 @@ module.exports = {
 
     saveModuleQualityMetrices: (req, res) => {
         //don't use await here
-        info('QUALITY METRICS DATA'.blue);
+        info('Quality Metrics Data'.blue);
         info(req.body);
         moduleQualityService.saveModuleQualityData(req.body).then (() => {
             res.status(200).send('Metrics saved.');
         }).catch(err => {
-            e && error(e);
-            e.stack && error(err.stack);
+            err && error(err);
             !res.headersSent && res.status(500).send('Error saving metrics');
         })
         

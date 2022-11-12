@@ -6,7 +6,7 @@ const { getUserId } = require('../../user/service/user');
 //default logger
 const { info, error, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 const requiresAdminRole = (route) => {
-  info(`Checking this route: ${route}.`);
+  info(`Checking this route: ${route}`);
   return route.includes('admin') && !route.includes('locate');
 };
 

@@ -65,8 +65,9 @@ const authenticate = async (password, traceId) => {
   !response && throwError('No response from server!');
   info(`${SERVER_NAME} authenticated.`.green.bold);
   const { tokens, newPassword } = response;
-  info('Access token = ');
-  info(`${JSON.stringify(tokens, null, 2)}`);
+  info('Session tokens = ');
+  console.log(tokens);
+  info(tokens);
   NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
   return response;
 }
@@ -123,7 +124,6 @@ const register = async (token, traceId) => {
     info(`${JSON.stringify(env, null, 2)}`);
     configureMiddleware();
     const traceId = startTrace(module);
-    console.log('tracing');
     //start the app so that it can authenticate itself
     const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
     !started && throwError('Authentication server could not be started');

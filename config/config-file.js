@@ -5,8 +5,14 @@ const fs = require('node:fs/promises');
 const { throwError } = require('../core/validation/validation');
 const { error, info, getModuleLoggingMetaData } = require('../logging/logger/global-logger')(module);
 
-//TO DO - rewrite to use dotenv.parse()
 
+/**
+ * Creates a new configuration file manager class to manage ".cfg" files.
+ * A ".cfg" file contains properties that may change while the app is running, making them
+ * inappropriate to store in a .env file.
+ * @class
+ * @todo rewrite to use dotenv.parse()
+ */
 class ConfigurationFile {
   #file;
   #keyValueMap;
@@ -16,23 +22,40 @@ class ConfigurationFile {
     this.#fileLoaded = false;
   }
 
+/**
+ * Creates a new configuration file manager class.
+ * @async
+ * @param {string} file filepath of configration file (.cfg)
+ */
   async read(file) {
     return await this.#readConfigFile(file);
   }
 
+/**
+ * Retrieves a property from the .cfg file.
+ * 
+ * @param {string} key property to retreive from the .cfg file
+ */
   get(key) {
     return this.#keyValueMap.get(key);
   }
 
+/**
+ * Reads the contents of a property file from disk and stores the properties in a key value store
+ * This is a private method, consumers should use read.
+ * 
+ * @private
+ * @param {string} file filepath of configration file (.cfg)
+ * 
+ */
   async #readConfigFile(file) {
     if (this.#keyValueMap.size > 0) return;
-    this.#keyValueMap.size > 0 &&
-      throwError('Configuration file has already been loaded!');
     this.#file = file;
     info(`Reading configuration file.`);
     try {
       const data = await fs.readFile(file, 'utf-8');
       info('File contents.');
+      if (data.length < 1) return; //config file exists but it is empty
       info(JSON.stringify(data, null, 2));
       data.split('\n').forEach((keyValuePair) => {
         const key = keyValuePair.split('=')[0];
@@ -45,16 +68,27 @@ class ConfigurationFile {
       });
       this.#fileLoaded = true;
     } catch (e) {
-      error(JSON.stringify(e.stack, null, 2));
-      error('Could not read file!');
+        e.stack && error(e.stack);
+        error('Could not read file!');
     }
   }
 
+/**
+ * Saves a ".cfg" file.
+ * @async
+ * 
+ */
   async save() {
     if (!this.#fileLoaded) throw new Error('No configuration file loaded!');
     return await this.#writeConfigToFile();
   }
 
+/**
+ * Sets the value of a propery in the ".cfg" file.
+ * @async
+ * 
+ * 
+ */
   setValue(key, value) {
     if (!this.#fileLoaded) throw new Error('No configuration file loaded!');
     info(`Key = ${key}`);

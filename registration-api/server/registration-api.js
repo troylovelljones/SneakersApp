@@ -56,8 +56,7 @@ const authenticate = async (password, traceId) => {
   );
   info(`${SERVER_NAME} authenticated.`.green.bold);
   const { tokens, newPassword } = response;
-  info('Access token = ');
-  info(`${JSON.stringify(tokens, null, 2)}`);
+  info('Session tokens = ') && info(tokens);
   NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
   return response;
 };
@@ -133,8 +132,8 @@ const register = async (token, traceId) => {
       stopTrace(module, traceId);
       // <------------SERVER START UP DONE------------->
     } catch (e) {
-        error(`${JSON.stringify(e, null, 2)}`);
-        error(`${JSON.stringify(e.stack, null, 2)}`);
+        e && error(e);
+        e.stack && error(e.stack);
         error('<----------Error condition triggered, error caught, server will not reattempt, shutting down---------->');
         error('Could not start registration-app-server');
         //Give the logger time to log the errors before shutting down the server
