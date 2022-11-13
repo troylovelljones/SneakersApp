@@ -2,12 +2,10 @@
 
 const moduleQualityService = require('../services/module-quality-service');
 const logEntriesService = require('../services/log-entries-service');
-const { info, error } = require('../../../logging/logger/global-logger')(module);
+const { debug, error } = require('../../../logging/logger/global-logger')(module);
 
 
 module.exports = {
-
-  
 
     getLogEntries: (req, res) => {
         //don't use await here
@@ -41,8 +39,8 @@ module.exports = {
 
     saveModuleQualityMetrices: (req, res) => {
         //don't use await here
-        info('Quality Metrics Data'.blue);
-        info(req.body);
+        debug('Quality Metrics Data'.blue);
+        debug(req.body);
         moduleQualityService.saveModuleQualityData(req.body).then (() => {
             res.status(200).send('Metrics saved.');
         }).catch(err => {

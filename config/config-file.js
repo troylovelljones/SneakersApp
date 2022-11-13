@@ -3,7 +3,7 @@
 const fs = require('node:fs/promises');
 
 const { throwError } = require('../core/validation/validation');
-const { error, info, getModuleLoggingMetaData } = require('../logging/logger/global-logger')(module);
+const { debug, error, getModuleLoggingMetaData } = require('../logging/logger/global-logger')(module);
 
 
 /**
@@ -51,12 +51,12 @@ class ConfigurationFile {
   async #readConfigFile(file) {
     if (this.#keyValueMap.size > 0) return;
     this.#file = file;
-    info(`Reading configuration file.`);
+    debug(`Reading configuration file.`);
     try {
       const data = await fs.readFile(file, 'utf-8');
-      info('File contents.');
+      debug('File contents.');
       if (data.length < 1) return; //config file exists but it is empty
-      info(JSON.stringify(data, null, 2));
+      debug(JSON.stringify(data, null, 2));
       data.split('\n').forEach((keyValuePair) => {
         const key = keyValuePair.split('=')[0];
         const value = keyValuePair.split('=')[1];
@@ -91,23 +91,23 @@ class ConfigurationFile {
  */
   setValue(key, value) {
     if (!this.#fileLoaded) throw new Error('No configuration file loaded!');
-    info(`Key = ${key}`);
-    info(`Value = ${value}`);
+    debug(`Key = ${key}`);
+    debug(`Value = ${value}`);
     this.#keyValueMap.set(key, value);
     return this;
   }
 
   async #writeConfigToFile() {
     let newData = ''; //set to an empty string, otherwise the file will begin with 'undefined'
-    info('Writing configuration file.');
+    debug('Writing configuration file.');
     const json = JSON.stringify(Object.fromEntries(this.#keyValueMap), null, 2);
     try {
       const iterator1 = this.#keyValueMap[Symbol.iterator]();
       for (const keyValuePair of iterator1) {
-        info('Key = ');
-        info(keyValuePair[0]);
-        info('Value = ');
-        info(isNaN(keyValuePair[1]));
+        debug('Key = ');
+        debug(keyValuePair[0]);
+        debug('Value = ');
+        debug(isNaN(keyValuePair[1]));
         keyValuePair[1] =
           keyValuePair[1].toString().toUpperCase() === 'FALSE'
             ? 'FALSE'
@@ -115,7 +115,7 @@ class ConfigurationFile {
         newData += keyValuePair.join('=').concat('\n');
       }
       await fs.writeFile(this.#file, newData);
-      info(`File ${this.#file} saved`);
+      debug(`File ${this.#file} saved`);
       return true;
     } catch (e) {
       error(`${this.#file} not saved!`);
@@ -135,7 +135,7 @@ module.exports = {
     const saveValueToConfigFile = async (property, value) => {
       const saved = await config.setValue(property, value).save();
       saved
-        ? info('New password written to .cfg file!')
+        ? debug('New password written to .cfg file!')
         : throwError('New password not written to .cfg file!');
     };
     return {

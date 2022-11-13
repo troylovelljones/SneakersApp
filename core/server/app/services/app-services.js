@@ -15,7 +15,7 @@ const TIMEOUT = process.env.TIMEOUT || devConstants.TIMEOUT;
 const TRY_DURATION = process.env.TRY_DURATION || devConstants.TRY_DURATION;
 let registryServerUrl = '';
 
-const { info, error, warn, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const { debug, error, info, warn, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 
 /**
  * A promise for the user's favorite color.
@@ -50,8 +50,8 @@ async function authenticateServer(authUrl, authInfo) {
     !serverId && throwError('Missing server id!');
     !password && throwError('Missing password!');
     !traceId && warn('No trace id provided.');
-    info('Authentication information = ');
-    info(`Contacting Authentication Server at ${authUrl}`.magenta);
+    debug('Authentication information = ');
+    debug(`Contacting Authentication Server at ${authUrl}`.magenta);
     const response = await axios.post(authUrl, authInfo);
     !response && throwError('No response from server!');
     return response;
@@ -79,12 +79,12 @@ const getRegistryServerUrl = () => {
   * @returns {Array.<String>} The list of endpoints/middleware registered on the app.
   */
 const getRoutingInformation = (app) => {
-  info('-Registered routes...'.white);
+  debug('-Registered routes...'.white);
   const routes = [];
   app._router.stack.forEach(function (middleware) {
     let route;
-    info('Middleware'.grey.bold.underline);
-    info(JSON.stringify(middleware, null, 2));
+    debug('Middleware'.grey.bold.underline);
+    debug(JSON.stringify(middleware, null, 2));
     if (middleware.route) {
       // routes registered directly on the app
       routes.push(middleware.route);
@@ -98,15 +98,15 @@ const getRoutingInformation = (app) => {
   });
   const routePathsArr = [];
   routes.forEach((route) => {
-    info(`Route path: `.white + `${route.path}`.green);
+    debug(`Route path: `.white + `${route.path}`.green);
     routePathsArr.push(route.path);
     route.stack.forEach((stack) => {
-      info(`-Route function: `.white + `${stack.name}`.brightBlue);
-      info(`-Route method: `.white + `${stack.method}`.magenta);
+      debug(`-Route function: `.white + `${stack.name}`.brightBlue);
+      debug(`-Route method: `.white + `${stack.method}`.magenta);
     });
   });
 
-  info('-End of registered routes'.white);
+  debug('-End of registered routes'.white);
   return routePathsArr;
 };
 
@@ -143,7 +143,7 @@ function onAppTermination(server, ipAddress, registrationServerUrl, token) {
 
   process.on('SIGTERM', () => {
     //all methods place here and below must be synchronous
-    info('SIGTERM signal received: closing HTTP server');
+    debug('SIGTERM signal received: closing HTTP server');
     const { server, ipAddress, token } = serverInstance();
     setServerStatus(ipAddress, 'Unavailable', registrationServerUrl, token).then(() => {
       server.close(() => {
@@ -167,10 +167,10 @@ function onAppTermination(server, ipAddress, registrationServerUrl, token) {
   * @returns {Object} - The response from the HTTP call to the registration service.
   */
 async function register(registrationUrl, regInfo, token, tries) {
-  info('<----------Calling register() on the client machine---------->'.gray);
+  debug('<----------Calling register() on the client machine---------->'.gray);
   const body = { ...regInfo, status: 'Avaiable' };
   try {
-    info(`Registering server at ${registrationUrl}`.magenta);
+    debug(`Registering server at ${registrationUrl}`.magenta);
     registryServerUrl = registrationUrl.replace('/register', '');
     const header = setAuthHeader(token);
     const response = await axios.post(`${registrationUrl}`, body, header);
@@ -197,23 +197,23 @@ let tries;
   */
 async function registerServer(registrationUrl, regInfo, token) {
   tries = 1;
-  info('<----------Start of registerServer() on the client machine---------->'.gray);
-  info(`Register app ${regInfo.name}`.cyan);
-  info('Registering with token: ');
-  info(JSON.stringify(token, null, 2));
-  info('Registration Info: ');
-  info(JSON.stringify(regInfo, null, 2));
-  info(`Server will attempt to register ${MAX_REGISTRATION_RETRIES} time(s).`);
+  debug('<----------Start of registerServer() on the client machine---------->'.gray);
+  debug(`Register app ${regInfo.name}`.cyan);
+  debug('Registering with token: ');
+  debug(JSON.stringify(token, null, 2));
+  debug('Registration Info: ');
+  debug(JSON.stringify(regInfo, null, 2));
+  debug(`Server will attempt to register ${MAX_REGISTRATION_RETRIES} time(s).`);
   try {
 
     while (tries < MAX_REGISTRATION_RETRIES) {
       //pause before calling the register function again
       await waitFor(TRY_DURATION);
-      info(`Register Attempt #: ${tries++}`.blue);
+      debug(`Register Attempt #: ${tries++}`.blue);
       const response = await register(registrationUrl, regInfo, token, tries);
-      info(`Response recieved. = ${response && JSON.stringify(response.data, null, 2) || 'no response'}`);
+      debug(`Response recieved. = ${response && JSON.stringify(response.data, null, 2) || 'no response'}`);
       if (response) {
-        info('<----------End of registerServer() on the client machine---------->'.gray);
+        debug('<----------End of registerServer() on the client machine---------->'.gray);
         return response;
       }
       
@@ -238,9 +238,9 @@ async function retry(func, ...params) {
   tries = 0;
   try {
     while (tries < MAX_RETRIES) {
-      info(`Attempt #: ${++tries}`);
+      debug(`Attempt #: ${++tries}`);
       const response = await func(...params);
-      info(`Response recieved. = ${response && JSON.stringify(response.data, null, 2) || 'no response'}`);
+      debug(`Response recieved. = ${response && JSON.stringify(response.data, null, 2) || 'no response'}`);
       if (response) {
         return response;
       }
@@ -266,7 +266,7 @@ async function retry(func, ...params) {
   * 
   */
 const setAuthHeader = (token) => {
-  info('Setting authorization header.');
+  debug('Setting authorization header.');
   return {
     headers: {
       Authorization: 'Bearer ' + token.jwt //the token is a variable which holds the token.
@@ -287,7 +287,7 @@ const setAuthHeader = (token) => {
   */
 async function setServerStatus(serverId, status, registrationServerUrl, token) {
   const body = {};
-  info('Updating registration info');
+  debug('Updating registration info');
   const url = registrationServerUrl + '/update/server';
   body.id = serverId;
   body.status = status;
@@ -295,7 +295,7 @@ async function setServerStatus(serverId, status, registrationServerUrl, token) {
   try {
     const header = setAuthHeader(token);
     const result = await axios.put(url, body, header);
-    info('Registration info succesfully updated.'.green);
+    debug('Registration info succesfully updated.'.green);
     return result;
   } catch (e) {
     error(e);
@@ -319,10 +319,10 @@ const startApp = async (app, name, port) => {
     return () => {
       //once callback is called, we know the app has started
       app.started = true;
-      info(
+      debug(
         `-Application server ${name} started on port ` + `${port}`.brightGreen
       );
-      info(
+      debug(
         `Application server started at ` +
           `${new Date()}.`.cyan +
           `Ready to receive API requests.`.brightGreen
@@ -335,20 +335,20 @@ const startApp = async (app, name, port) => {
   while (true) {
     const duration = new Date().getSeconds() - start;
     if (app.started) {
-      info('Server started!');
+      debug('Server started!');
       return {
         httpServer,
         started: true
       }; //once the app starts return from the function
     }
     if (duration >= TIMEOUT) {
-      info('Request to start server timed out!');
+      debug('Request to start server timed out!');
       return { started: false }; //once maxmum timeout is reached return from function
     } else {
-      info('Waiting for server to start...');
+      debug('Waiting for server to start...');
       await waitFor(POLL_INTERVAL); //wait for the app to start
     }
-    info('Waiting...waiting...waiting');
+    debug('Waiting...waiting...waiting');
   }
 };
 

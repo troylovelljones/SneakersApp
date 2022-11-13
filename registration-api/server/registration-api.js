@@ -29,19 +29,20 @@ const SERVER_ID = process.env.SERVER_ID || hostIpAddress;
 const SERVER_NAME = process.env.APP_NAME || 'registration-api-server';
 
 //logging
-const { error, getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
+const { debug, error, getModuleLoggingMetaData } = require('../../logging/logger/global-logger')(module);
 const { startTrace, stopTrace } = require('../../logging/logger/tracer');
 const { updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
 
 const { throwError } = require('../../core/validation/validation');
 
 const { getModuleDependencies, waitFor } = require('../../core/server/utils/app-utils');
+const { info } = require('console');
 const dependencies = Array.from(getModuleDependencies(module));
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
 module.getDependencies = () => dependencies;
 
-info(`Running node in ${NODE_ENV} mode.`);
-info(`IP address = ${hostIpAddress}`);
+debug(`Running node in ${NODE_ENV} mode.`);
+debug(`IP address = ${hostIpAddress}`);
 
 const authenticate = async (password, traceId) => {
   const authInfo = {
@@ -54,19 +55,19 @@ const authenticate = async (password, traceId) => {
     AUTHENTICATE_URL,
     authInfo
   );
-  info(`${SERVER_NAME} authenticated.`.green.bold);
+  debug(`${SERVER_NAME} authenticated.`.green.bold);
   const { tokens, newPassword } = response;
-  info('Session tokens = ') && info(tokens);
-  NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
+  debug('Session tokens = ') && debug(tokens);
+  NODE_ENV !== 'production' && debug(`New password = ${newPassword.password}`);
   return response;
 };
 
 const configureMiddleware = async () => {
   const protectedRouter = await getProtectedRouter();
-  (protectedRouter && info('Protected routes retrieved.'.green)) ||
+  (protectedRouter && debug('Protected routes retrieved.'.green)) ||
     throwError('Routes were not retrieved!');
   const unProtectedRouter = await getRouter();
-  (unProtectedRouter && info('Unprotected routes retrieved.'.green)) ||
+  (unProtectedRouter && debug('Unprotected routes retrieved.'.green)) ||
   throwError('Routes were not retrieved!');
   appServices.installDefaultMiddleware(app);
   app.use(requestCount);
@@ -82,27 +83,27 @@ const register = async (token, traceId) => {
     const serverInfo = {
       name: SERVER_NAME,
       ipAddress: hostIpAddress + (NODE_ENV === 'development' && 
-        info('Generated a random ip addres for testing.') && 
+        debug('Generated a random ip addres for testing.') && 
         devConstants.randomIpTuple() || ''),
       port: PORT,
       endPoints: appServices.getRoutingInformation(app),
       serverId: SERVER_ID,
       traceId
     };
-    info('Sending server information to registry service.');
-    info(`${JSON.stringify(serverInfo, null, 2)}`);
-    info(`Attempting to communicate with registration server at ${REGISTRATION_SERVER_URL}`);
+    debug('Sending server information to registry service.');
+    debug(`${JSON.stringify(serverInfo, null, 2)}`);
+    debug(`Attempting to communicate with registration server at ${REGISTRATION_SERVER_URL}`);
     const response = await appServices.registerServer(
       REGISTRATION_URL,
       serverInfo,
       token
     );
     !response && throwError('No response from server!');
-    info(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`);
-    info('Registration Response:');
-    info(`${JSON.stringify(response.data, null, 2)}`);
+    debug(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`);
+    debug('Registration Response:');
+    debug(`${JSON.stringify(response.data, null, 2)}`);
     const { id } = response.data;
-    id && info(`Saving server id.`) && await config.saveValueToConfigFile('SERVER_ID', id);
+    id && debug(`Saving server id.`) && await config.saveValueToConfigFile('SERVER_ID', id);
     app.id = id;
     return response.data;
   } catch (e) {
@@ -113,23 +114,24 @@ const register = async (token, traceId) => {
 
 (async () => {
     try {
-      info('Environment Variables');
-      info(`${JSON.stringify(env, null, 2)}`);
+      debug('Environment Variables');
+      debug(`${JSON.stringify(env, null, 2)}`);
       await configureMiddleware();
       const traceId = startTrace(module);
       const password = await configFile.getValueFromConfigFile('PASSWORD');
       !password && throwError('Server configuration file is missing or invalid!');
       // <---------------AUTHENTICATION--------------->
       const { newPassword, tokens } = await authenticate(password, traceId);
-      newPassword ? await configFile.saveValueToConfigFile('PASSWORD', newPassword.password) && info('A new pasword was saved to config file') : info('Server password was not changed.'); 
+      newPassword ? await configFile.saveValueToConfigFile('PASSWORD', newPassword.password) && debug('A new pasword was saved to config file') : debug('Server password was not changed.'); 
       const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
       !started && throwError('Authentication server could not be started');
       appServices.onAppTermination(httpServer, hostIpAddress, REGISTRATION_URL, tokens.accessToken);
-      info(`Tokens =  ${JSON.stringify(tokens)}`);
+      debug(`Tokens from authentication server =  ${JSON.stringify(tokens)}`);
       // <---------------REGISTRATION----------------->
       await register(tokens.accessToken, traceId);
       updateModuleLoggingMetaData(module, { phase:'ready' });
       stopTrace(module, traceId);
+      info('Registration server started!'.green);
       // <------------SERVER START UP DONE------------->
     } catch (e) {
         e && error(e);

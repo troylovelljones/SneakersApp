@@ -6,23 +6,23 @@ const POLL_INTERVAL = devConstants.POLL_INTERVAL;
 const { getModuleName } = require('./extended-app-utils');
 
 //logging setup
-const { info, getModuleLoggingMetaData, warn } = require('../../../logging/logger/global-logger')(module);
+const { debug, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
 const getHostName = () => {
   return os.hostname();
 };
 
 const getDependencies = (targetModule, dependencies) => {
-    warn('Dependencies evaluated = ');
-    warn(dependencies);
+    debug('Dependencies evaluated = ');
+    debug(dependencies);
   //base condition - recurse until the nmodule parameter has no children
   if ((targetModule && targetModule.children.length < 1) || 
-    (dependencies.has(targetModule) && !console.info('Duplicate: ' + getModuleName(targetModule.filename)))) {
+    (dependencies.has(targetModule) && debug('Duplicate: ' + getModuleName(targetModule.filename)))) {
     return dependencies;
   }
   for (const target of targetModule.children) {
-    if (target.filename.includes('node') || dependencies.has(target.filename) && warn(`Dependency for target ${getModuleName(target.filename)} already resolved.`)) 
+    if (target.filename.includes('node') || dependencies.has(target.filename) && debug(`Dependency for target ${getModuleName(target.filename)} already resolved.`)) 
       continue;
-    warn(`Parent: ` + getModuleName(targetModule.filename) + ' Child: ' + getModuleName(target.filename));
+    debug(`Parent: ` + getModuleName(targetModule.filename) + ' Child: ' + getModuleName(target.filename));
     dependencies.add(target.filename);
     getDependencies(target, dependencies);  
   }
@@ -32,15 +32,15 @@ const getDependencies = (targetModule, dependencies) => {
 
 const getModuleDependencies = (targetModule) => {
   const dependencies = new Set();
-  warn(`Getting module dependencies for ${getModuleName(targetModule.filename)}`.white);
+  debug(`Getting module dependencies for ${getModuleName(targetModule.filename)}`.white);
   const list = getDependencies(targetModule, dependencies);
-  warn(`Dependencies for module ${getModuleName(targetModule.filename)}`.white);
-  list.forEach(dependency => info(getModuleName(dependency, 2)));
+  debug(`Dependencies for module ${getModuleName(targetModule.filename)}`.white);
+  list.forEach(dependency => debug(getModuleName(dependency, 2)));
   return list;
 }
 
 const waitFor = async (duration) => {
-    info('Waiting...');
+    debug('Waiting...');
     await new Promise((r) => setTimeout(r, duration));
 };
 

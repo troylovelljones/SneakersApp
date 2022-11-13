@@ -4,9 +4,9 @@ const { authenticateTokenAsync } = require('../../secrets/services/token');
 const colors = require('colors');
 const { getUserId } = require('../../user/service/user');
 //default logger
-const { info, error, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const {  debug, error, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 const requiresAdminRole = (route) => {
-  info(`Checking this route: ${route}`);
+  debug(`Checking this route: ${route}`);
   return route.includes('admin') && !route.includes('locate');
 };
 
@@ -15,19 +15,19 @@ const authorizeAdminRoutes = (req, res, next) => {
   const clientIp = req.ip.includes('::ffff:') ? req.ip.split('::ffff:')[1] : req.ip;
   getModuleLoggingMetaData().traceId = req.traceId;
 
-  info('Checking if an admin route has been requested by the client');
+  debug('Checking if an admin route has been requested by the client');
   if (!requiresAdminRole(req.url, clientIp)) {
-    info('Not an admin route request.'); //add the client ip to the log
+    debug('Not an admin route request.'); //add the client ip to the log
     return next();
   }
 
-  info('Checking header for a valid access token.');
+  debug('Checking header for a valid access token.');
   const authHeader = req.headers['authorization'];
   const token =
     (authHeader && authHeader.split(' ')[1]) ||
     req.query.token ||
     req.cookies.token;
-  info(token && 'Token found.');
+  debug(token && 'Token found.');
   //if the token is missing from the query string, the authorization header or the cookie,
   //deny access to the router
   if (token == null) return res.status(401).send('Unauthorized');
@@ -44,7 +44,7 @@ const authorizeAdminRoutes = (req, res, next) => {
       secretsPromise
         .then((result) => {
           const { accessTokenSecret } = result;
-          info(`Authenticating token with secret ${accessTokenSecret}.`);
+          debug(`Authenticating token with secret ${accessTokenSecret}.`);
           //use the stored secret to validate the signature of the token
           authenticateTokenAsync(token, accessTokenSecret)
             .then((payload) => {
@@ -53,7 +53,7 @@ const authorizeAdminRoutes = (req, res, next) => {
               //if not deny access to the route
               if (!payload || !payload.admin) return res.sendStatus(403);
               req.token = payload;
-              info('Token authenticated.');
+              debug('Token authenticated.');
               next();
             })
             .catch((err) => {

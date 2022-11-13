@@ -19,7 +19,7 @@ const SERVER_NAME = process.env.SERVER_NAME || 'auth-api-svr';
 const { getUserId } = require('../../../core/server/user/service/user')
 const { updateModuleLoggingMetaData } = require('../../../logging/logger/logger-manager');
 const { createAndSaveTokens, generateNewPassword, validatePassword, validateToken } = require('../services/authentication-services');
-const { error, info, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
+const { debug, error, info, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module);
 
 module.getDependencies = () => dependencies;
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
@@ -33,39 +33,38 @@ module.exports = {
   authenticateServer: async (req, res) => {
     const clientIp = req.ip.split('::ffff:')[1];
     const traceId = req.traceId;
-    info(`Request trace id = ${traceId}`);
-    const phase = clientIp === HOST_IP_ADDRESS ? 'startup' : 'ready';
-    updateModuleLoggingMetaData(module, { clientIp, traceId, phase });
-    info('<------------------REQUEST RECIEVED---------------->.'.cyan);
+    debug(`Request trace id = ${traceId}`);
+    updateModuleLoggingMetaData(module, { clientIp, traceId, phase: 'startup' });
+    debug('<------------------REQUEST RECIEVED---------------->.'.cyan);
     try {
-      info('Logging configuration');
-      info(JSON.stringify(getModuleLoggingMetaData()));
-      info('<------------START OF authenticateServer() ------>.'.gray);
-      info('Authentication request recieved.');
+      debug('Logging configuration');
+      debug(JSON.stringify(getModuleLoggingMetaData()));
+      debug('<------------START OF authenticateServer() ------>.'.gray);
+      debug('Authentication request recieved.');
       const skipAuthentication = await config.getValueFromConfigFile('SKIP_AUTHENTICATION');
       const refreshPassword = await config.getValueFromConfigFile('REFRESH_PASSWORD');
-      info(`Skip authentication = ${skipAuthentication}`);
-      info(`Refresh Password = ${refreshPassword}`);
+      debug(`Skip authentication = ${skipAuthentication}`);
+      debug(`Refresh Password = ${refreshPassword}`);
       const { serverId , password } = req.body;
       if (!serverId) return res.status(401).send('Missing server id!');
-      NODE_ENV !='production' && info(`serverId = ${serverId}, password = ${password}`);
+      NODE_ENV !='production' && debug(`serverId = ${serverId}, password = ${password}`);
       const validPassword = skipAuthentication || await validatePassword(serverId, password);
       if (!validPassword) return res.status(401).send(`Missing creditials for ${serverId}!`);
-      const newPassword = refreshPassword && info('generating a new password') && await generateNewPassword(serverId);
-      const tokens = info('Creating access tokens.') && await createAndSaveTokens(serverId, ACCESS_TOKEN_DURATION);
-      info(`Server ${serverId} authorized!`);
-      info('Resetting clientIp and phase logging metadata');
+      const newPassword = refreshPassword && debug('generating a new password') && await generateNewPassword(serverId);
+      const tokens = debug('Creating access tokens.') && await createAndSaveTokens(serverId, ACCESS_TOKEN_DURATION);
+      debug(`Server ${serverId} authorized!`);
+      debug('Resetting clientIp and phase logging metadata');
       updateModuleLoggingMetaData(module, {clientIp: null, phase: 'ready'});
       NODE_ENV !== 'production' && 
-        info(`New secret = ${newPassword}.`) && 
-        info(`Tokens = ${JSON.stringify(tokens)}.`) &&
-        info(`TraceId = ${traceId}.`);
+        debug(`New secret = ${newPassword}.`) && 
+        debug(`Tokens = ${JSON.stringify(tokens)}.`) &&
+        debug(`TraceId = ${traceId}.`);
 
-      res.status(200).send(newPassword && info('Sending new password') && { newPassword, tokens, traceId, registrationUrl: REGISTRATION_URL } || { tokens, traceId, registrationUrl: REGISTRATION_URL });
+      res.status(200).send(newPassword && debug('Sending new password') && { newPassword, tokens, traceId, registrationUrl: REGISTRATION_URL } || { tokens, traceId, registrationUrl: REGISTRATION_URL });
       //try not to add any code that could cause an error after saving the new password/tokens and before sending the response  
-      info('Authorization complete, data sent.');
-      info('<----------END OF authenticateServer()---------->');
-      info('<------------------RESPONSE SENT----------------->.'.green);
+      debug('Authorization complete, data sent.');
+      debug('<----------END OF authenticateServer()---------->');
+      debug('<------------------RESPONSE SENT----------------->.'.green);
   
     } catch (e) {
         error(`${JSON.stringify(e.stack, null, 2)}`);
@@ -83,7 +82,7 @@ module.exports = {
       //if not deny access to the route
       if (!payload || !payload.admin) return res.sendStatus(403);
       res.token = payload;
-      info('Token authenticated.');
+      debug('Token authenticated.');
       return res.status(200).send('Authorized');
     } catch (e) {
       error(e);
@@ -93,29 +92,29 @@ module.exports = {
 
   authenticateUser: async (req, res) => {
     try {
-      info(`The request body = ${JSON.stringify(req.body, null, 2)}`);
+      debug(`The request body = ${JSON.stringify(req.body, null, 2)}`);
 
-      info('Authentication request recieved.');
+      debug('Authentication request recieved.');
       const { username, password } = req.body;
-      info(`username = `);
-      info(username);
+      debug(`username = `);
+      debug(username);
       NODE_ENV != 'production' && !
-        info(`password = `) &&
-        info(password);
+        debug(`password = `) &&
+        debug(password);
       const id = await getUserId(username);
       const valid = await validatePassword(id, password);
-      info(`Authenticating User ${id}`);
-      info(`Valid = ${valid}`);
+      debug(`Authenticating User ${id}`);
+      debug(`Valid = ${valid}`);
       if (!valid) {
-        info('Invalid credentials.'.red);
+        debug('Invalid credentials.'.red);
         return res.status(401).send('Unauthorized Access.');
-      } else info('Credentials are valid.'.green);
+      } else debug('Credentials are valid.'.green);
       if (!id) return res.status(401).send('User is not registered.');
       //save the new token secrets that were generated when creating the token
       const tokens = await authenticationService.createAndSaveTokens(id);
       //save the new token secrets that were generated when creating the token
-      info(`User ${id} authorized!`);
-      info('----RESPONSE SENT----.'.green);
+      debug(`User ${id} authorized!`);
+      debug('----RESPONSE SENT----.'.green);
       return res.status(200).send({ message: 'success', statusCode: 200,  tokens }); //this needs to be the last line, otherwise exception handling will generate an unhandled exception
      
     } catch (e) {
@@ -130,9 +129,9 @@ module.exports = {
       const token = req.query.token;
       const type = req.query.type;
       const id = req.query.id;
-      info('Refreshing token = ');
-      info(token);
-      info(`For id: ${id}`);
+      debug('Refreshing token = ');
+      debug(token);
+      debug(`For id: ${id}`);
       const { accessTokenSecret, refreshTokenSecret } =
         await token.getTokenSecretsById(id);
       const secret =
@@ -141,7 +140,7 @@ module.exports = {
       const newToken = payload ? await createTokens(id) : null;
       newToken && (await saveSecrets(id, newToken, newToken.refreshToken));
       res.set('Authorization', `Bearer ${token.jwt}`);
-      info(`Sending new token ${newToken.jwt}.`);
+      debug(`Sending new token ${newToken.jwt}.`);
       return res.status(200).send(newToken);
     } catch (e) {
       error(JSON.stringify(e));

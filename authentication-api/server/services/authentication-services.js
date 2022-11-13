@@ -11,20 +11,25 @@ const ACCESS_TOKEN_DURATION = process.env.ACCESS_TOKEN_DURATION || devConstants.
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SERVER_NAME = process.env.SERVER_NAME || 'auth-api-svr';
 
-const { info, error, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module, SERVER_NAME);
+const { debug, error, getModuleLoggingMetaData } = require('../../../logging/logger/global-logger')(module, SERVER_NAME);
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
 
+/**
+ * Creates and save a refresh or access token for the entity identifier id
+ * @async
+ * @param {number} id Id to be saved along with other injfo
+ */
 const createAndSaveTokens = async (id) => {
     //save the new token secrets that were generated when creating the tokens
-    info('Creating tokens.');
+    debug('Creating tokens.');
     //valid credentials obtained so create a new access token
     const accessToken = await tokenService.createTokenAsync(id, 'Access Token', ACCESS_TOKEN_DURATION);
     const refreshToken = await tokenService.createTokenAsync(id, 'Refresh Token');
-    info('Tokens from createTokens(): ');
-    info('Access Token = ');
-    info(accessToken && `${JSON.stringify(accessToken, null, 2)}`);
-    info('Refresh Token = ');
-    info(refreshToken && `${JSON.stringify(accessToken, null, 2)}`);
+    debug('Tokens from createTokens(): ');
+    debug('Access Token = ');
+    debug(accessToken && `${JSON.stringify(accessToken, null, 2)}`);
+    debug('Refresh Token = ');
+    debug(refreshToken && `${JSON.stringify(accessToken, null, 2)}`);
     const tokens = { accessToken, refreshToken };
     await tokenService.saveTokensAsync(id, tokens);
     accessToken.id = id;
@@ -32,35 +37,52 @@ const createAndSaveTokens = async (id) => {
     return tokens;
   };
   
+  /**
+    * Creates and new password for the entity identifier id
+    * @async
+    * @param {number} id User/Server id associated with password
+    * @returns {string} newPassword object containing the new encytped password
+    */
   const generateNewPassword = async (id) => {
     const newPassword = await passwordService.generateAndEncryptPassword();
-    info('A new password was generated');
+    debug('A new password was generated');
     await passwordService.saveEncryptedPassword(id, newPassword.encryptedPassword);
-    NODE_ENV !== 'production' && info(`Password = ${JSON.stringify(newPassword, null, 2)}`);
+    NODE_ENV !== 'production' && debug(`Password = ${JSON.stringify(newPassword, null, 2)}`);
     delete newPassword.encryptedPassword;
     return newPassword;
   };
   
+  /**
+    * Valides password for user/server id.
+    * @async
+    * @param {number} id User/Server id associated with password
+    */
   const validatePassword = async (id, password) => {
     try {  
-      info(`authentication services validatePassword().`);
-      info(`Id = ${id}.`);
+      debug(`authentication services validatePassword().`);
+      debug(`Id = ${id}.`);
       const valid = await passwordService.validatePassword(id, password);
-      info(`Valid = ${JSON.stringify(valid)}`)
-      valid ? info('Credentials are valid or validation was skipped based on the value in the .cfg file.'.green) : info(`Invalid credentials for ${id }!`);
+      debug(`Valid = ${JSON.stringify(valid)}`)
+      valid ? debug('Credentials are valid or validation was skipped based on the value in the .cfg file.'.green) : debug(`Invalid credentials for ${id }!`);
       return valid;
     } catch (e) {
         error('validatePassword() error.  Attempt to validate password failed.')
         throw e;
     }
   };
-
+/**
+  * Creates and save a refresh or access token for the entity identifier id
+  * @async
+  * @param {number} id User/Server id associated with password
+  * @param {string} token/refresh token for this object
+  * 
+  */
   const validateToken = async (id, token) =>{
     try {
       const Secrets = await getSecrets();
       const result = await Secrets.locateSecretsById(id , 'Access Token');
       const { accessTokenSecret } = result;
-      info(`Authenticating token with secret ${accessTokenSecret}.`);
+      debug(`Authenticating token with secret ${accessTokenSecret}.`);
       const payload = tokenService.authenticateTokenAsync(token, accessTokenSecret);
       return payload;
       } catch(e) {

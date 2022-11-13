@@ -5,7 +5,7 @@ require('colors');
 const { getModel } = require('../../../core/server/repository/databases/mongodb/model/model');
 const { throwError } = require('../../../core/validation/validation.js');
 const createRegistrySchema = require('./registry-schema');
-const { error, getModuleLoggingMetaData, info } = require('../../../logging/logger/global-logger')(module);
+const { error, getModuleLoggingMetaData, debug } = require('../../../logging/logger/global-logger')(module);
 
 const getRegistry = async () => {
   try {
@@ -19,12 +19,12 @@ const getRegistry = async () => {
 };
     
 const locate = async (registry, criteria) => {
-  info(`Searching for `);
-  criteria && info(JSON.stringify(criteria)) || throwError('Criteria cannot be null!')
+  debug(`Searching for `);
+  criteria && debug(JSON.stringify(criteria)) || throwError('Criteria cannot be null!')
   try {
     const result = await registry.findOne(criteria);
-    result && info(`Located server: ${result.serverName} `, 'green');
-    info(`${JSON.stringify(result)}`);
+    result && debug(`Located server: ${result.serverName} `, 'green');
+    debug(`${JSON.stringify(result)}`);
     !result && throwError('Could not locate server!'.red);
     return result;
   } catch (e) {
@@ -39,21 +39,21 @@ async function configRegistry() {
     const Registry = await getModel('registry', createRegistrySchema);
     Registry.getModuleLoggingMetaData = getModuleLoggingMetaData;
     !Registry && throwError('Missing Registry object');
-    info('Sucessfully loaded App Registry Model'.green);
+    debug('Sucessfully loaded App Registry Model'.green);
 
     Registry.createEntry = async (name, ipAddress, port, endPoints, status, serverId) => {
-      info('<----------start of Registry.createEntry()---------->');
-      info(`serverId = ${serverId}`);
-      info(`ipAddress = ${ipAddress}`);
-      info(`name = ${name}`);
-      info(`port = ${port}`);
-      info(`endPoints = ${endPoints}`);
+      debug('<----------start of Registry.createEntry()---------->');
+      debug(`serverId = ${serverId}`);
+      debug(`ipAddress = ${ipAddress}`);
+      debug(`name = ${name}`);
+      debug(`port = ${port}`);
+      debug(`endPoints = ${endPoints}`);
       try {
         const result = await new Registry({name, ipAddress, port, endPoints, status,serverId}).save();
         !result && throwError('Error saving registry entry!');
-        info(`Created registery entry for Server ${name}.  Info: `.green) &&
-        info(`${JSON.stringify(name, null,2)}`);
-        info('<----------end of Registry.createEntry()---------->');
+        debug(`Created registery entry for Server ${name}.  Info: `.green) &&
+        debug(`${JSON.stringify(name, null,2)}`);
+        debug('<----------end of Registry.createEntry()---------->');
         return { id: result._id };
       } catch (e) {
           error(`createEntry() error.  Error creating registry entry for: ${name}!`);
@@ -65,12 +65,12 @@ async function configRegistry() {
 
     Registry.deleteEntry = async (criteria) => {
       try {
-        info('<----------start of Registry.deleteEntry()---------->');
-        info('Deleting any old registry entries.'.blue);
+        debug('<----------start of Registry.deleteEntry()---------->');
+        debug('Deleting any old registry entries.'.blue);
         const result = await Registry.deleteOne({ criteria });
-        Object.keys(result) > 0 && info('Deleted old registry entry.  Info: ') && info(`${JSON.stringify(result, null,2)}`);
+        Object.keys(result) > 0 && debug('Deleted old registry entry.  info: ') && debug(`${JSON.stringify(result, null,2)}`);
         Object.keys(result) < 1 && info('No previous registration found.'.cyan);
-        info('<----------end of Registry.deleteEntry()---------->');
+        debug('<----------end of Registry.deleteEntry()---------->');
         return result;
       } catch (e) {
           error('deleteEntry() error.  Error deleting registry entry!'.red);
@@ -80,36 +80,36 @@ async function configRegistry() {
     };
 
     Registry.locateEntryById = async (id, available = true) => {
-      info(`Searching for `.magenta + `'${id}'`.blue);
+      debug(`Searching for `.magenta + `'${id}'`.blue);
       const criteria = (available && { id, status: 'Available' }) || { id };
-      info('Search criteria');
-      info(`${JSON.stringify(criteria, null,2)}`);
+      debug('Search criteria');
+      debug(`${JSON.stringify(criteria, null,2)}`);
       return await locate(Registry, criteria);
     };
 
     Registry.locateEntryByName = async (serverName, available = true) => {
-      info(`Searching for `.magenta + `'${serverName}'`.blue);
+      debug(`Searching for `.magenta + `'${serverName}'`.blue);
       const criteria = (available && {
         name: serverName,
         status: 'Available'
       }) || { name: serverName };
-      info(`criteria = ${JSON.stringify(criteria)}.`)
+      debug(`criteria = ${JSON.stringify(criteria)}.`)
       return await locate(Registry, criteria);
     };
 
     Registry.saveEntry = async (name, ipAddress, port, endPoints, status, id) => {
       try {
-        info('<----------start of Registry.saveEntry()---------->');
-        info(`name = ${name}.`);
-        info(`id = ${id}`);
-        info(`ipAddress = ${ipAddress}.`);
-        info(`port = ${port}.`);
-        info(`endpoints = `) && info(endPoints);
-        info(`status = ${status}.`);
+        debug('<----------start of Registry.saveEntry()---------->');
+        debug(`name = ${name}.`);
+        debug(`id = ${id}`);
+        debug(`ipAddress = ${ipAddress}.`);
+        debug(`port = ${port}.`);
+        debug(`endpoints = `) && debug(endPoints);
+        debug(`status = ${status}.`);
         await Registry.deleteEntry(ipAddress);
         const result = await Registry.createEntry(name, ipAddress, port, endPoints, status, id);
-        info(`${name} saved to registry.`, 'green');
-        info('<----------end of Registry.saveEntry()---------->');
+        debug(`${name} saved to registry.`, 'green');
+        debug('<----------end of Registry.saveEntry()---------->');
         return result.id;
       } catch (e) {
         error(`${name} was not saved to the registry`, 'red');
@@ -149,7 +149,7 @@ async function configRegistry() {
           throw e;
       }
     };
-    info('App Registry Created.'.green);
+    debug('App Registry Created.'.green);
     return Registry;
 }
   

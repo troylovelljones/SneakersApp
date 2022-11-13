@@ -73,7 +73,7 @@ const test = false;
 const TEST = (importArgs[0] && importArgs[0].toUpperCase() === 'TEST') || test;
 
 const { sanitizeString } = require('../../../validation/validation');
-const { log: logInfo, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const { debug, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
 
 const addReturningStatement = (sqlStatement, field) => {
@@ -100,14 +100,14 @@ const createUpdatedAtTimestamp = (timestamps) => {
 //else if the value is an empty throw an error
 const translateValue = (value, alwaysTreatPropertyValueAsString) => {
   const quotIfy = (value) => `'${value}'`;
-  logInfo(`Untranslated value:`.underline + ` ${value}`.blue);
+  debug(`Untranslated value:`.underline + ` ${value}`.blue);
   //if value is a string we need to remove unwanted characters
   //and convert to a SQL property
   if (
     (isNaN(value) && typeof value === 'string') ||
     alwaysTreatPropertyValueAsString
   ) {
-    logInfo(`Translate: `.underline + `${value}`.blue + ` as a string.`);
+    debug(`Translate: `.underline + `${value}`.blue + ` as a string.`);
     //remove invalid characters
     const removeList = [`'`, `"`]; //todo - investigate Regular Expression here
     for (const char of value) {
@@ -117,7 +117,7 @@ const translateValue = (value, alwaysTreatPropertyValueAsString) => {
     //can't use the '?' operator becuase of the throw below
     else throw new Error(`Missing value!`.red);
   }
-  logInfo(
+  debug(
     'Translated value:'.underline +
       ' ' +
       (value?.blue || `NULL`.grey.bold.underline.italic)
@@ -135,10 +135,10 @@ const throwError = (message) => {
 };
 
 const includeTimestampsInUpdate = (updateStatement, options) => {
-  logInfo('Timestamp properties: ');
-  logInfo(options?.timestamp);
+  debug('Timestamp properties: ');
+  debug(options?.timestamp);
   if (!options?.timestamps) return false; //nothing to do if no timstamps don't exist
-  logInfo(`Including defined timestamps`.green);
+  debug(`Including defined timestamps`.green);
   const { timestamps } = options;
   const updatedAt = timestamps?.updatedAt;
   const timestampString = UFID + EQUAL_TO + UVID;
@@ -150,7 +150,7 @@ const includeTimestampsInUpdate = (updateStatement, options) => {
     .replace(UFID, updatedAt)
     .replace(UVID, dbTimestampFunction);
   !updateStatement && new Error(`SQL Statement is blank!`.red);
-  logInfo(
+  debug(
     'Update statement from includeTimeSTamps...= ' +
       updateStatement.magenta.bold
   );
@@ -176,10 +176,10 @@ const updateFromProperties = (record, updateStatement, options) => {
       .replace(UFID, mappedProperty)
       .replace(UVID, updateValue);
 
-    logInfo(updateStatement.green);
+    debug(updateStatement.green);
   });
   !updateStatement && new Error('SQL statement is blank!'.red);
-  logInfo(
+  debug(
     'Update statement from updateFromProps... = '.cyan.underline.italic +
       updateStatement.magenta.bold
   );
@@ -189,7 +189,7 @@ const updateFromProperties = (record, updateStatement, options) => {
 const updateFromRecord = (record, updateStatement, options) => {
   updateStatement = updateFromProperties(record, updateStatement, options);
   !updateStatement && new Error('SQL statement is blank!'.red);
-  logInfo(`Updated statement from updateFrom = `.gray + updateStatement);
+  debug(`Updated statement from updateFrom = `.gray + updateStatement);
   return updateStatement;
 };
 
@@ -200,7 +200,7 @@ const orderByFields = [];
 function whereClause(sqlStatement) {
   let savedSqlStatement = sqlStatement;
   !sqlStatement && throwError('SQL statement cannot be empty');
-  logInfo(
+  debug(
     '\nStatement passed to SQL conditional genrerator --> \n'.underline.bold +
       sqlStatement.green.italic
   );
@@ -249,11 +249,11 @@ function whereClause(sqlStatement) {
   };
 
   const checkForDuplicateGroupBy = (fields) => {
-    logInfo(`Logging inside of duplicate checking `.yellow);
-    logInfo(fields);
+    debug(`Logging inside of duplicate checking `.yellow);
+    debug(fields);
     if (!sqlStatement.includes(GROUP_BY)) return;
     for (const field of fields) {
-      logInfo(`Checking ` + field.blue);
+      debug(`Checking ` + field.blue);
       sqlStatement.indexOf(field, sqlStatement.indexOf(GROUP_BY)) > 0 &&
         throwError(field + ' already included in group by');
     }
@@ -301,14 +301,14 @@ function whereClause(sqlStatement) {
       sqlStatement = sqlStatement
         .replace(UVID, translateValue(value))
         .replace(OPID, EQUAL_TO);
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
     isEqualToField: (field) => {
       //need to clean up validateConditionals
       validateConditional();
       sqlStatement = sqlStatement.replace(UVID, field).replace(OPID, EQUAL_TO);
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
 
@@ -318,7 +318,7 @@ function whereClause(sqlStatement) {
       value = (value && translateValue(value)) || UVID;
       sqlStatement = sqlStatement.replace(OPID, GREATER_THAN);
       replace(UVID, value);
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
 
@@ -327,7 +327,7 @@ function whereClause(sqlStatement) {
       validateConditional();
       value = (value && translateValue(value)) || UVID;
       sqlStatement = replace(UVID, value).replace(OPID, LESS_THAN);
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
     orEqualTo: (value) => {
@@ -339,7 +339,7 @@ function whereClause(sqlStatement) {
       sqlStatement = sqlStatement
         .replace(GREATER_THAN, GREATER_THAN.EQUAL_TO)
         .replace(LESS_THAN, LESS_THAN.EQUAL_TO);
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
     isLike: (value) => {
@@ -350,7 +350,7 @@ function whereClause(sqlStatement) {
       sqlStatement = sqlStatement
         .replace(OPID, LIKE)
         .replace(UVID, translateValue(value));
-      logInfo(sqlStatement.magenta);
+      debug(sqlStatement.magenta);
       return conditionals;
     },
 
@@ -365,13 +365,13 @@ function whereClause(sqlStatement) {
       //too much code in this method.  Need to refactor
       fields = Array.isArray(fields) ? fields : [fields];
       Array.isArray(fields)
-        ? logInfo('Got an array of fields.')
-        : logInfo('Got a single field.');
+        ? debug('Got an array of fields.')
+        : debug('Got a single field.');
       checkForDuplicateGroupBy(fields);
       Array.isArray(fields)
-        ? logInfo('still dealing with an array')
-        : logInfo('not an array');
-      logInfo(`Examining the sql in group by statement: ` + sqlStatement);
+        ? debug('still dealing with an array')
+        : debug('not an array');
+      debug(`Examining the sql in group by statement: ` + sqlStatement);
       sqlStatement.includes(GROUP_BY) ||
         (sqlStatement.includes(ORDER_BY) &&
           throwError(
@@ -381,17 +381,17 @@ function whereClause(sqlStatement) {
       //clear the group by field by setting array length to 0;
       groupByFields.length = 0;
       fields.forEach((field, index) => {
-        logInfo(`Adding ${field}`.blue + ` to group by clause`);
+        debug(`Adding ${field}`.blue + ` to group by clause`);
         groupByFields.push(field);
         const isLastField = index === fields.length - 1;
         sqlStatement =
           (!isLastField && sqlStatement.replace(UFID, field + COMMA + UFID)) ||
           sqlStatement.replace(UFID, field);
       });
-      logInfo('Select fields: ');
-      logInfo(selectFields);
-      logInfo('Group by fields: ');
-      logInfo(selectFields);
+      debug('Select fields: ');
+      debug(selectFields);
+      debug('Group by fields: ');
+      debug(selectFields);
       !JSON.stringify(selectFields) == JSON.stringify(groupByFields) &&
         throwError(
           'Every field in the select clause must appear in the group by clause.'
@@ -404,29 +404,29 @@ function whereClause(sqlStatement) {
       //duplicates group by in many ways
       fields = Array.isArray(fields) ? fields : [fields];
       Array.isArray(fields)
-        ? logInfo('Got an array of fields.')
-        : logInfo('Got a single field.');
+        ? debug('Got an array of fields.')
+        : debug('Got a single field.');
       checkForDuplicateGroupBy(fields);
-      logInfo(`Examining the sql in order by statement: ` + sqlStatement);
+      debug(`Examining the sql in order by statement: ` + sqlStatement);
       sqlStatement.includes(ORDER_BY) &&
         throwError('Cannot have multiple ORDER BY statements');
       sqlStatement = sqlStatement + ORDER_BY;
       //clear the order by field by setting array length to 0;
       orderByFields.length = 0;
       fields.forEach((field, index) => {
-        logInfo(`Adding ${field}`.blue + ` to order by clause`);
+        debug(`Adding ${field}`.blue + ` to order by clause`);
         orderByFields.push(field);
         const isLastField = index === fields.length - 1;
         sqlStatement =
           (!isLastField && sqlStatement.replace(UFID, field + COMMA + UFID)) ||
           sqlStatement.replace(UFID, field);
       });
-      logInfo('Select fields: ');
-      logInfo(selectFields);
-      logInfo('Group by fields: ');
-      logInfo(groupByFields);
-      logInfo('Group by fields: ');
-      logInfo(groupByFields);
+      debug('Select fields: ');
+      debug(selectFields);
+      debug('Group by fields: ');
+      debug(groupByFields);
+      debug('Group by fields: ');
+      debug(groupByFields);
       return conditionals;
     },
     descending: () => {
@@ -437,13 +437,13 @@ function whereClause(sqlStatement) {
     limit: (value) => {
       //need more validation in this method
       if (value < 1) return conditionals;
-      logInfo(sqlStatement);
+      debug(sqlStatement);
       !sqlStatement ||
         (!sqlStatement.includes(SELECT) && throwError('Invalid use of LIMIT!'));
       //limit has to be the last modifier in the sql select statement, it can be easily replaced
-      logInfo('Removing Limit: ');
-      logInfo('postion of the word limit: ' + sqlStatement.indexOf(LIMIT) - 1);
-      logInfo(sqlStatement.substr(0, sqlStatement.indexOf(LIMIT)));
+      debug('Removing Limit: ');
+      debug('postion of the word limit: ' + sqlStatement.indexOf(LIMIT) - 1);
+      debug(sqlStatement.substr(0, sqlStatement.indexOf(LIMIT)));
       sqlStatement = !sqlStatement.includes(LIMIT)
         ? sqlStatement + LIMIT(value)
         : sqlStatement.substr(0, sqlStatement.indexOf(LIMIT) - 1) +
@@ -473,8 +473,8 @@ function whereClause(sqlStatement) {
     value: sqlStatement,
     writable: false
   });
-  logInfo('Conditionals object: '.gray);
-  logInfo(conditionals);
+  debug('Conditionals object: '.gray);
+  debug(conditionals);
   return conditionals;
 }
 
@@ -488,15 +488,15 @@ const replaceTablenames = (tablenames, selectStatement) => {
   selectStatement = SELECT_STATEMENT;
   tablenames.forEach((tablename, index) => {
     const isLastTable = index === tablenames.length - 1;
-    logInfo(`Adding table `.blue + `${tablename}`.magenta);
+    debug(`Adding table `.blue + `${tablename}`.magenta);
     selectStatement = !isLastTable
       ? selectStatement.replace(TABLE, tablename + COMMA + TABLE)
-      : logInfo(`Added last table to select`) &&
+      : debug(`Added last table to select`) &&
         selectStatement.replace(TABLE, tablename);
 
-    logInfo(selectStatement.green);
+    debug(selectStatement.green);
   });
-  logInfo(
+  debug(
     `Select statement after adding tables `.blue + `${selectStatement}`.magenta
   );
   return selectStatement;
@@ -510,10 +510,10 @@ const replaceFields = (fieldnames, sqlStatement) => {
     const fieldParam = fieldname.toUpperCase() + nextFieldPlaceholder;
     sqlStatement = sqlStatement.replace(UFID, fieldParam);
     selectFields.push(fieldname);
-    logInfo(`Added field `.blue + `${fieldname}`.yellow);
+    debug(`Added field `.blue + `${fieldname}`.yellow);
   });
-  logInfo(`Select statement after field replacement: `.blue);
-  logInfo(sqlStatement.magenta);
+  debug(`Select statement after field replacement: `.blue);
+  debug(sqlStatement.magenta);
   return sqlStatement;
 };
 
@@ -521,14 +521,14 @@ const insert_timestamp_field = (sqlInsertStatement, field) => {
   //this function modifies the SQL to include database generated timestamps on insert
   //in the future this can be done automagically by the database server
   const REPLACEMENT_IDENTIFIER = '@';
-  logInfo('starting insertFromTimestamp... '.yellow + sqlInsertStatement);
+  debug('starting insertFromTimestamp... '.yellow + sqlInsertStatement);
   //set up field replacement capability using '@' character
   //the first ) in the string is aways where we want to do replace
   sqlInsertStatement = sqlInsertStatement.replace(
     ')',
     REPLACEMENT_IDENTIFIER + ')'
   );
-  logInfo(sqlInsertStatement.grey);
+  debug(sqlInsertStatement.grey);
   //add the timestamp field into the SQL string
   //the @ is used to identify where the timestamp fields
   //should be inserted into the sql string
@@ -536,7 +536,7 @@ const insert_timestamp_field = (sqlInsertStatement, field) => {
     REPLACEMENT_IDENTIFIER,
     COMMA + field.toUpperCase()
   );
-  logInfo(sqlInsertStatement.grey);
+  debug(sqlInsertStatement.grey);
   if (!sqlInsertStatement)
     throwError('Insert statement returned from insertTimeField is null!');
   return sqlInsertStatement;
@@ -549,9 +549,9 @@ const insert_db_time_function = (
   dbTimeFunction
 ) => {
   !dbTimeFunction && throwError('Missing timestamp function!');
-  logInfo('Generating timestamps....'.green);
-  logInfo(`Database duration function: `.grey + `${dbTimeFunction}`);
-  logInfo(
+  debug('Generating timestamps....'.green);
+  debug(`Database duration function: `.grey + `${dbTimeFunction}`);
+  debug(
     (
       'Insert Substring up to last character: ' +
       sqlInsertStatement.substr(0, sqlInsertStatement.length - 1)
@@ -559,7 +559,7 @@ const insert_db_time_function = (
   );
   //now add the timestamp function to the end of the SQL statement
   const timestampValue = COMMA + dbTimeFunction + ')';
-  logInfo('Timestamp value: ' + timestampValue.yellow, dbTimeFunction);
+  debug('Timestamp value: ' + timestampValue.yellow, dbTimeFunction);
   //final result should look like INSERT INTO (X, Y, Z, CREATED_AT, UPDATED_AT, etc) VALUES (A, B, C, TIMESTAMP_FUNC, TIMESTAMP_FUNC, etc)
   for (const field in fields)
     sqlInsertStatement =
@@ -579,7 +579,7 @@ const insert_timestamp_fields = (sqlInsertStatement, timestamps) => {
     timestamps.fields = { created_at: 'created_at', updatedAt: 'updated_at' };
     timestamps.dbTimeFunction = DEFAULT_DB_TIMESTAMP;
   };
-  logInfo('Creating timestamp fields...'.green);
+  debug('Creating timestamp fields...'.green);
   const createDefaultTS =
     timestamps?.includeDefaultTimestampFields === true &&
     create_default_timestamps();
@@ -588,14 +588,14 @@ const insert_timestamp_fields = (sqlInsertStatement, timestamps) => {
     throwError('Missing timestamp fields!');
   //looping over timestamp field values to insert into sql insert
   Object.keys(timestamps.fields).forEach((property, index) => {
-    logInfo('Timestamp property: ' + timestamps.fields[property]);
+    debug('Timestamp property: ' + timestamps.fields[property]);
     sqlInsertStatement = insert_timestamp_field(
       sqlInsertStatement,
       timestamps.fields[property]
     );
   });
 
-  logInfo('after insertTimeStampFields... '.yellow + sqlInsertStatement);
+  debug('after insertTimeStampFields... '.yellow + sqlInsertStatement);
   return (
     sqlInsertStatement ||
     throwError('Insert statement in insertTimestampFields is null')
@@ -608,7 +608,7 @@ const record_fieldsOrValues_to_insertStatement = (
   sqlInsertStatement,
   options
 ) => {
-  logInfo('start of insertFromRecordProperties'.yellow, sqlInsertStatement);
+  debug('start of insertFromRecordProperties'.yellow, sqlInsertStatement);
 
   Object.keys(record).forEach((property, index) => {
     let isLastProperty = index === Object.keys(record).length - 1;
@@ -617,15 +617,15 @@ const record_fieldsOrValues_to_insertStatement = (
     //unless an we get an actual mapped property => property mapping
     //in mappedProperties
     let mappedProperty = mappedProperties?.[property] || property;
-    logInfo(`Property = ${property} `.gray + `, Index = ${index}`);
+    debug(`Property = ${property} `.gray + `, Index = ${index}`);
 
     //look for properities in the options object
     //whose values should be treated as strings
     //for the purpose of insertion
     const treatPropertyValueAsString =
       options?.treatPropertyValueAsString?.[property];
-    logInfo(`Mapped Property: `);
-    logInfo(mappedProperty?.yellow);
+    debug(`Mapped Property: `);
+    debug(mappedProperty?.yellow);
     //replace UFID and UVID values
     //statement = INSERT INTO TABLE_NAME
     //start with replacing UFID - this is done exactly once per insert statement
@@ -634,7 +634,7 @@ const record_fieldsOrValues_to_insertStatement = (
     sqlInsertStatement = sqlInsertStatement
       //replace(UFID, `${(mappedProperty + '').
       .replace(UFID, `${mappedProperty.toUpperCase()}` + placeholder);
-    logInfo(sqlInsertStatement);
+    debug(sqlInsertStatement);
     //if not last record => statement should += (field_name, UFID) VALUES (UVID)
     //otherwise statement should += (fieldName) VALUES (UVID)
     //replace UFID next
@@ -646,9 +646,9 @@ const record_fieldsOrValues_to_insertStatement = (
         placeholder
     );
     //(field_name, UFID) values (field_value, UVID)
-    logInfo(`Insert Statement from properties...` + sqlInsertStatement.gray);
+    debug(`Insert Statement from properties...` + sqlInsertStatement.gray);
   });
-  logInfo(
+  debug(
     'insertFromProperties after insertDBTimeFunction... '.magenta +
       sqlInsertStatement
   );
@@ -675,7 +675,7 @@ function records_to_insertStatement(records, sqlInsertStatement, options) {
   records.forEach((record, index) => {
     const isLastRecord = index === records.length - 1;
     checkForEmptyRecord(record);
-    logInfo(
+    debug(
       `insertFieldsAndValuesFromObjects before insertFromProperties... `.yellow,
       sqlInsertStatement
     );
@@ -686,7 +686,7 @@ function records_to_insertStatement(records, sqlInsertStatement, options) {
     );
     //add a new row of values if we have another record to process
     sqlInsertStatement += (!isLastRecord && COMMA + ROW_DATA) || '';
-    logInfo(
+    debug(
       'insertFieldsAndValuesFromObjects after insertFromProperties... '.yellow,
       sqlInsertStatement
     );
@@ -717,9 +717,9 @@ const createSqlSelectStatement = (tablenames, fieldnames, options) => {
   selectStatement =
     (fieldnames && replaceFields(fieldnames, selectStatement)) ||
     selectStatement;
-  logInfo('Created SQL statement: '.blue + selectStatement?.yellow);
+  debug('Created SQL statement: '.blue + selectStatement?.yellow);
   const theWhereClause = whereClause(selectStatement);
-  logInfo(theWhereClause);
+  debug(theWhereClause);
   return theWhereClause;
 };
 
@@ -733,10 +733,10 @@ const createSqlInsertStatement = (tablename, records, options) => {
   );
   sqlInsertStatement ||
     throwError('Insert statement after insertTimestampFields is null');
-  logInfo(
+  debug(
     `SQL insert statement from inserTimestampFields...${sqlInsertStatement}`
   );
-  logInfo(
+  debug(
     'constructInsertStatement before insertFromObjects'.yellow,
     sqlInsertStatement.green
   );
@@ -762,7 +762,7 @@ const createSqlInsertWhereStatement = (
   options
 ) => {
   let insertStatement = INSERT_STATEMENT_NO_VALUES.replace(TABLE, tablename);
-  logInfo(
+  debug(
     'constructInsertWhereStatement before...'.yellow,
     insertStatement.green
   );
@@ -778,8 +778,8 @@ const createSqlInsertWhereStatement = (
 };
 
 const createSqlUpdateStatement = (tableName, record, options) => {
-  logInfo(`Options passed to createUpdate.. = `.blue.underline.italic);
-  logInfo(options);
+  debug(`Options passed to createUpdate.. = `.blue.underline.italic);
+  debug(options);
   let updateStatement = UPDATE_STATEMENT.replace(TABLE, tableName);
   options?.timestamps &&
     options?.createDefaultTimeStamps &&
@@ -791,8 +791,8 @@ const createSqlUpdateStatement = (tableName, record, options) => {
 
 //DELETE FIELD_A, FIELDB, FIELDC...FROM TABLE WHERE SOME CONDITIONS ARE MET
 const createsqlDeleteStatement = (tableName, fields, options) => {
-  logInfo(`Options passed to createDelete... = `.blue.underline.italic);
-  logInfo(options);
+  debug(`Options passed to createDelete... = `.blue.underline.italic);
+  debug(options);
   let deleteStatement = DELETE_STATEMENT.replace(TABLE, tableName);
   options?.timestamps &&
     options.includeUpdatedAt &&
@@ -819,7 +819,7 @@ if (TEST) {
   };
   const options = { timestamps };
 
-  logInfo(`Test #${testCount++}`.green);
+  debug(`Test #${testCount++}`.green);
   let insertStatement = createSqlInsertStatement(
     `users`,
     [
@@ -834,7 +834,7 @@ if (TEST) {
     ],
     options
   );
-  logInfo(insertStatement?.white || 'Function failed!'.red);
+  debug(insertStatement?.white || 'Function failed!'.red);
 
   const testArray = [
     {
@@ -855,9 +855,9 @@ if (TEST) {
     }
   ];
 
-  logInfo(`Test #${testCount++}`.green);
+  debug(`Test #${testCount++}`.green);
   insertStatement = createSqlInsertStatement(`drinkers`, testArray, options);
-  logInfo(insertStatement?.white || 'Function failed!'.red);
+  debug(insertStatement?.white || 'Function failed!'.red);
 
   const testArray2 = [
     {
@@ -886,9 +886,9 @@ if (TEST) {
     }
   ];
 
-  logInfo(`Test #${testCount++}`.green);
+  debug(`Test #${testCount++}`.green);
   insertStatement = createSqlInsertStatement(`shoe_heads`, testArray2, options);
-  logInfo(insertStatement?.white || 'Function failed!'.red);
+  debug(insertStatement?.white || 'Function failed!'.red);
 
   const testArray3 = [
     {
@@ -917,21 +917,21 @@ if (TEST) {
     }
   ];
 
-  logInfo(`Test #${testCount++}`.green);
+  debug(`Test #${testCount++}`.green);
   options.mappedProperties = {
     address: 'home_address',
     favoriteDrink: 'favorite_drink'
   };
   options.timestamps.lastLogin = 'last_log_in_at';
   insertStatement = createSqlInsertStatement(`shoe_heads`, testArray3, options);
-  logInfo(insertStatement?.white || 'Function failed!'.red);
+  debug(insertStatement?.white || 'Function failed!'.red);
   let firstSelect = createSqlSelectStatement('sneaker_user', [
     'username',
     'password',
     'last_login_time'
   ]);
-  logInfo(`SQL statement generated: ` + firstSelect.SQL_STATEMENT.green);
-  logInfo(firstSelect);
+  debug(`SQL statement generated: ` + firstSelect.SQL_STATEMENT.green);
+  debug(firstSelect);
   firstSelect = firstSelect.where('username').isEqualTo('troy1971').get();
   log(firstSelect + '\n');
   const secondSelect = createSqlSelectStatement('sneaker_user', [
@@ -944,7 +944,7 @@ if (TEST) {
     .and('password')
     .isEqualTo('3453egdfg@##')
     .get();
-  logInfo(secondSelect + '\n');
+  debug(secondSelect + '\n');
   const thirdSelect = createSqlSelectStatement('sneaker_user', [
     'username',
     'password',
@@ -957,7 +957,7 @@ if (TEST) {
     .and('last_login_in_time')
     .isEqualTo(new Date())
     .get();
-  logInfo(thirdSelect + '\n');
+  debug(thirdSelect + '\n');
   const updateStatement = createSqlUpdateStatement(
     'users',
     testArray[0],
@@ -966,5 +966,5 @@ if (TEST) {
     .where('user_id')
     .isEqualTo(10)
     .get();
-  logInfo(updateStatement);
+  debug(updateStatement);
 }

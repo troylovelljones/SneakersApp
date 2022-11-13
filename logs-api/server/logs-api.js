@@ -36,14 +36,13 @@ const SERVER_ID = process.env.SERVER_ID;
 const { getModuleDependencies, waitFor } = require('../../core/server/utils/app-utils');
 
 //logging
-const {error,  getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
+const {debug, error, getModuleLoggingMetaData } = require('../../logging/logger/global-logger')(module);
 const { startTrace, stopTrace } = require('../../logging/logger/tracer');
 const {enableSendingQualityMetrics, updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
 
-
 module.getModuleLoggingMetaData = getModuleLoggingMetaData;
 const dependencies = Array.from(getModuleDependencies(module));
-info(dependencies);
+debug(dependencies);
 module.getDependencies = () => dependencies;
 
 env.error && throwError(env.error);
@@ -70,14 +69,14 @@ const authenticate = async (password, traceId) => {
   !response && throwError('No response from server!');
   info(`${SERVER_NAME} authenticated.`.green.bold);
   const { tokens, newPassword } = response;
-  info('Session tokens = ');
-  info(`${JSON.stringify(tokens, null, 2)}`);
-  NODE_ENV !== 'production' && info(`New password = ${newPassword.password}`);
+  debug('Session tokens = ');
+  debug(`${JSON.stringify(tokens, null, 2)}`);
+  NODE_ENV !== 'production' && debug(`New password = ${newPassword.password}`);
   return response;
 }
 
 const configureMiddleware = async () => {
-  unProtectedRouter && info('Unprotected routes retrieved.') || throwError('Routes were not retrieved!');
+  unProtectedRouter && debug('Unprotected routes retrieved.') || throwError('Routes were not retrieved!');
   appServices.installDefaultMiddleware(app);
   app.use(requestCount);
   app.use(unProtectedRouter); //unprotected Routes
@@ -102,27 +101,27 @@ const register = async (registrationUrl, token, traceId) => {
     const serverInfo = {
       name: SERVER_NAME,
       ipAddress: hostIpAddress + (NODE_ENV === 'development' && 
-        info('Generated a random ip addres for testing.') && 
+        debug('Generated a random ip addres for testing.') && 
         devConstants.randomIpTuple() || ''),
       port: PORT,
-      endPoints: appServices.getRoutingInformation(app),
+      endPoints: appServices.getRoutingdebugrmation(app),
       serverId: SERVER_ID,
       traceId
     };
-    info('Sending server information to registry service.');
-    info(`${JSON.stringify(serverInfo, null, 2)}`);
-    info(`Attempting to communicate with registration server at ${registrationUrl}`);
+    debug('Sending server information to registry service.');
+    debug(`${JSON.stringify(serverdebug, null, 2)}`);
+    debug(`Attempting to communicate with registration server at ${registrationUrl}`);
     const response = await appServices.registerServer(
       registrationUrl,
       serverInfo,
       token
     );
     !response && throwError('No response from server!');
-    info('Registration Response:');
-    info(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`);
-    info(`${JSON.stringify(response.data, null, 2)}`);
+    debug('Registration Response:');
+    debug(`SERVER NAME: ${SERVER_NAME}, SERVER ID: ${SERVER_ID}, PORT ${PORT}, SUCCESSFULLY REGISTERED.`);
+    debug(`${JSON.stringify(response.data, null, 2)}`);
     const { id } = response.data;
-    id && info(`Saving server id.`) && await config.saveValueToConfigFile('SERVER_ID', id);
+    id && debug(`Saving server id.`) && await config.saveValueToConfigFile('SERVER_ID', id);
     app.id = id;
     return response.data;
   } catch (e) {
@@ -132,32 +131,33 @@ const register = async (registrationUrl, token, traceId) => {
   }
 };
 
-let metricsIntervalId; 
-const startSendingLoggingMetrics = (serverId, accessToken) => {
-  return enableSendingQualityMetrics(serverId, accessToken);
+
+const startSendingLoggingMetrics = (accessToken) => {
+  debug('Registering access token = ') && debug(accessToken);
+  return enableSendingQualityMetrics(accessToken);
 }
 
 (async () => {
   try {
-    info('Environment Variables');
-    info(env);
+    debug('Environment Variables');
+    debug(env);
     configureMiddleware();
     const traceId = startTrace(module);
     const password = await configFile.getValueFromConfigFile('PASSWORD');
     !password && throwError('Server configuration file is missing or invalid!');
     await getConnection();
-    const db = info('Connecting to Mongo DB...') && await getConnection();
+    const db = debug('Connecting to Mongo DB...') && await getConnection();
      // <---------------AUTHENTICATION--------------->
     const { newPassword, registrationUrl, tokens } = await authenticate(password, traceId);
     !tokens.accessToken && error('Unable to obtain an access token!') && throwError();
-    const intervalId = startSendingLoggingMetrics(SERVER_ID, tokens.accessToken);
-    newPassword && info(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
+    debug('Start sending logging metrics');
+    newPassword && debug(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
     // <---------------REGISTRATION----------------->
     await register(registrationUrl, tokens.accessToken, traceId);
     updateModuleLoggingMetaData(module, { phase: 'ready' });
-    //start the app so that it can receive logging information
+    //start the app so that it can receive logging debugrmation
     const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
-    
+    startSendingLoggingMetrics(tokens.accessToken);
     appServices.onAppTermination(httpServer, hostIpAddress, registrationUrl, tokens.accessToken);
     !started && throwError('Authentication server could not be started');
     stopTrace(module, traceId);

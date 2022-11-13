@@ -6,10 +6,17 @@
 // Select the database to use.
 use('Sneakers');
 
+const resetDatabase = false;
 // The drop() command destroys all data from a collection.
 // Make sure you run it against the correct database and collection.
-db.server_health_data.deleteMany({});
-db.server_log_entries.deleteMany({});
+//db.server_health_data.deleteMany({});
+//db.server_log_entries.deleteMany({});
+//db.registry.deleteMany({});
+
+//db.server_health_data.find({});
 db.registry.deleteMany({});
+db.registry.find({});
+
+
 
 

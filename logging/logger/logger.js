@@ -6,6 +6,7 @@ const winston = require('winston');
 const { createLogger, format, transports } = winston;
 const { colorize, combine, label, ms, printf, timestamp, prettyPrint } = format;
 const HOST_IP = require('../../core/server/utils/host-ip');
+const { throwError } = require('../../core/validation/validation');
 
 const loggers = new Map();
 const suspendLogging = [];
@@ -161,12 +162,16 @@ function logFileRowFormat({
   const serverName = !suspendLogging.includes('serverName') && metaData.serverName || null;
   const phase = !suspendLogging.includes('phase') && metaData.phase || null;
   const traceId = !suspendLogging.includes('traceId') && metaData.traceId || null;
+  const eventTime = metaData.eventTime && metaData.eventTime.toISOString();
   message = colorMessage(message, stack, level);
-
+  !eventTime && console.log(JSON.stringify(metaData, null, 2)) && throwError('Missing event time!');
   const logFormat =
-    `[`.white +
+    `[`.white.bold +
     `${ timestamp }`.blue +
-    `]: `.white +
+    `]: `.white.bold +
+    `[`.white.bold +
+    `${ eventTime }`.cyan.bold + 
+    `]: `.white.bold +
     `${ hostIp }: `.white +
     ((clientIp && `${ clientIp }: `.bold) || '') +
     ((phase && `${phase.toUpperCase()}: `.green.bold) || '') +
