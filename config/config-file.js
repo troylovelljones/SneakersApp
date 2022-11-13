@@ -85,8 +85,10 @@ class ConfigurationFile {
 
 /**
  * Sets the value of a propery in the ".cfg" file.
- * @async
  * 
+ * @param {string} key Index of the value to be set
+ * @param {any} value Value to save to the confiuration file
+ * @returns {ConfigurationFile}
  * 
  */
   setValue(key, value) {
@@ -97,6 +99,13 @@ class ConfigurationFile {
     return this;
   }
 
+  /**
+    * Writes the stored key values pairs to the .cfg file
+    * @async
+    * @private
+    * @returns {boolean} True is the properties were successfully writing to .cfg
+    * 
+    */
   async #writeConfigToFile() {
     let newData = ''; //set to an empty string, otherwise the file will begin with 'undefined'
     debug('Writing configuration file.');
@@ -107,37 +116,59 @@ class ConfigurationFile {
         debug('Key = ');
         debug(keyValuePair[0]);
         debug('Value = ');
+        //huh??
         debug(isNaN(keyValuePair[1]));
-        keyValuePair[1] =
-          keyValuePair[1].toString().toUpperCase() === 'FALSE'
-            ? 'FALSE'
-            : keyValuePair[1];
+        keyValuePair[1] = keyValuePair[1].toString().toUpperCase() === 'FALSE' ? 'FALSE' : keyValuePair[1];
         newData += keyValuePair.join('=').concat('\n');
       }
       await fs.writeFile(this.#file, newData);
       debug(`File ${this.#file} saved`);
       return true;
     } catch (e) {
-      error(`${this.#file} not saved!`);
+        error(`${this.#file} not saved!`);
+        Object.keys(e).length > 0 && error(e);
+        e.stack && error(e.stack);
     }
   }
 }
 
 module.exports = {
+  /**
+    * Loads the configuration file at {@link filename}
+    * 
+    * @param {string} filename File path of the configuration file.
+    * @returns {{getValuefromConfigFile: function, saveValueToConfigFile: function}} An object containing two functions, {@link getValueFromConfigFile} and {@link saveValueToConfigFile}.
+    * 
+    */
   getConfigFile: (filename) => {
     const config = new ConfigurationFile();
-
+    
+    /**
+      * Loads {@link key} from the configutation file
+      * 
+      * @param {string} key Property to be retreived from the configuration file.
+      * @returns {string} The value of the property in the configuration file.
+      * 
+      */
     const getValueFromConfigFile = async (key) => {
       await config.read(filename);
       return config.get(key);
     };
 
+    /**
+      * Saves the {@link property} with {@link value} to the configuration file.
+      * 
+      * @param {string} property Name of the property to be saved to the configuration file.
+      * @param {string} value Value of the property to ve saved to the configuration file.
+      * @returns {boolean} Truthy if the property value was succesfully saved to the file.
+      * 
+      */
     const saveValueToConfigFile = async (property, value) => {
-      const saved = await config.setValue(property, value).save();
-      saved
-        ? debug('New password written to .cfg file!')
-        : throwError('New password not written to .cfg file!');
+      config.setValue(property, value);
+      const saved = await config.save();
+      saved ? debug(`${property} written to .cfg file!`) : throwError(`${property} not written to .cfg file!`);
     };
+
     return {
       getValueFromConfigFile,
       saveValueToConfigFile

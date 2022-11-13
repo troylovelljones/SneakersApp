@@ -106,7 +106,7 @@ function getGlobalLogger (metaDataCallback, trackModuleMetrics) {
     
     //<------default logger----->
     const log = (message, metaData) => {
-      !message && logWarn('No message logged!');
+      !message && logWarning('No message logged!');
       !globalLogger && throwError('Logger is null!'); 
       //format message such that object types print well as string 
       message = (typeof message === 'string' && message) || JSON.stringify(message, null, 2);
@@ -164,7 +164,8 @@ function getGlobalLogger (metaDataCallback, trackModuleMetrics) {
         */
       //<-----info logger----->
       const info = (message, metaData) => {
-        log(message, { ...metaData, level:'info', eventTime: new Date()});
+        metaData = {...metaData, level: 'info', eventTime: new Date()};
+        log(message, metaData);
         return true;
       };
 
@@ -178,10 +179,10 @@ function getGlobalLogger (metaDataCallback, trackModuleMetrics) {
         */
       //<------warn logger----->
       const warn = (message, metaData) => {
-   
         metaData = metaData || metaDataCallback();
+        metaData = {...metaData, leve: 'warn', eventTime: new Date()};
         globalLogger.emit('log-warn', { module: metaData.module, newError: false, newWarning: true });
-        log(message, {...metaData, level: 'warn', eventTime: new Date()});
+        log(message, metaData);
         return true;
       };
       
@@ -273,24 +274,9 @@ function getNewLogger(moduleName, options, trackModuleMetrics = true) {
 const logError = (message) => {
   message = (typeof message === 'string' && message) || JSON.stringify(message, null, 2);
   !moduleLogger || !moduleLoggerMetaData && throwError('Logger is null or metadata is null');
-  moduleLogger.emit('log-error', {module: moduleName, newError: true, newWarnining: false})
+  moduleLogger.emit('log-error', {module: moduleName, errors: 1, warnings: 0})
   moduleLogger.error(message, {eventTime: new Date(), ...moduleLoggerMetaData});
   return true
-}
-
-/**
-  * This function will log a warning with the supplied message.
-  * @private
-  * @author Troy Lovell Jones
-  * @param {string} message - The message to be logged
-  * @returns {boolean} - Returns true if the message was logged
-  */
-const logWarning = (message) => {
-  message = (typeof message === 'string' && message) || JSON.stringify(message, null, 2);
-  !moduleLogger || !moduleLoggerMetaData && throwError('Logger is null or metadata is null');
-  moduleLogger.emit('log-warn', {module: moduleName, newWarning: true, newError: false});
-  moduleLogger.warn(message, {eventTime: new Date(), ...moduleLoggerMetaData});
-  return true;
 }
 
 /**
@@ -304,6 +290,22 @@ const logInfo = (message) => {
   message = (typeof message === 'string' && message) || JSON.stringify(message, null, 2);
   !moduleLogger || !moduleLoggerMetaData && throwError('Logger is null or metadata is null');
   moduleLogger.info(message, {eventTime: new Date(), ...moduleLoggerMetaData});
+  return true;
+}
+
+/**
+  * This function will log a warning with the supplied message.
+  * @private
+  * @author Troy Lovell Jones
+  * @param {string} message - The message to be logged
+  * @returns {boolean} - Returns true if the message was logged
+  */
+ const logWarning = (message) => {
+  message = (typeof message === 'string' && message) || JSON.stringify(message, null, 2);
+  !moduleLogger || !moduleLoggerMetaData && throwError('Logger is null or metadata is null');
+  moduleLogger.emit('log-warn', { module: moduleName, errors: 0, warnings: 1 });
+  const metaData = {eventTime: new Date(), ...moduleLoggerMetaData}
+  //moduleLogger.warn(message, metaData);
   return true;
 }
 
@@ -400,7 +402,7 @@ const stopTrace = (module, traceId) => {
   * @returns {undefined} undefined
   */ 
 const syncChildModules = (childModules, data, optionalMetaData) => {
-  moduleLogger.warn(optionalMetaData, optionalMetaData);
+  logWarning(optionalMetaData, optionalMetaData);
    //copying optionalMetaData do metaData so we don't change optionalMetaData
   const metaData = optionalMetaData && { ...optionalMetaData } || null;
   metaData.phase = metaData.phase || 'startup'; 
@@ -518,7 +520,7 @@ const updateModuleLoggingMetaData = async (module, data) => {
   * @param {boolean} flushMetrics Boolean indicating whether metrics should be flushed from buffer and saved to an endpoint
   * @param {object} accessToken Access-token to use to authenticate with remote logging service
   */ 
-const updateModuleQualityData = async ({module, newError, newWarning}, flushMetrics = false, accessToken) => {
+const updateModuleQualityData = async ({ module, errors, warnings }, flushMetrics = false, accessToken) => {
   flushMetrics && logDebug('UMQD Access token = ') && logDebug(accessToken);
   const validParameters = () => {
     logDebug('ValidateParameters() arguments...');
@@ -555,7 +557,8 @@ const updateModuleQualityData = async ({module, newError, newWarning}, flushMetr
     !validParameters() && throwError('Invalid parameter, module cannot be null!');
     logDebug('Updating module quality.', moduleLoggerMetaData);
     let { errorCount, warningCount } = moduleQualityMap.get(module) || { errorCount: 0, warningCount: 0 };
-    (newError && errorCount++) + (newWarning && warningCount++);
+    errorCount += errors;
+    warningCount += warnings;
     logDebug(`Total errors = ${errorCount}`, moduleLoggerMetaData);
     logDebug(`Total warnings = ${warningCount}`, moduleLoggerMetaData);
     moduleQualityMap.set(module, { module, errorCount, warningCount });

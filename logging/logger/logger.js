@@ -164,7 +164,6 @@ function logFileRowFormat({
   const traceId = !suspendLogging.includes('traceId') && metaData.traceId || null;
   const eventTime = metaData.eventTime && metaData.eventTime.toISOString();
   message = colorMessage(message, stack, level);
-  !eventTime && console.log(JSON.stringify(metaData, null, 2)) && throwError('Missing event time!');
   const logFormat =
     `[`.white.bold +
     `${ timestamp }`.blue +

@@ -15,7 +15,7 @@ const TIMEOUT = process.env.TIMEOUT || devConstants.TIMEOUT;
 const TRY_DURATION = process.env.TRY_DURATION || devConstants.TRY_DURATION;
 let registryServerUrl = '';
 
-const { debug, error, info, warn, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
+const { debug, error, warn, getModuleLoggingMetaData } = require('../../../../logging/logger/global-logger')(module);
 
 /**
  * A promise for the user's favorite color.
@@ -247,8 +247,8 @@ async function retry(func, ...params) {
       await waitFor(RETRY_DURATION);
     }
   } catch (e) {
-    error('Throwing exception');
-    error(`Call to ${func.name} failed`);
+      error('Throwing exception');
+      error(`Call to ${func.name} failed`);
     error(`Will make ${MAX_RETRIES} more attempt(s)`);
    
   }
@@ -298,9 +298,9 @@ async function setServerStatus(serverId, status, registrationServerUrl, token) {
     debug('Registration info succesfully updated.'.green);
     return result;
   } catch (e) {
-    error(e);
-    error(e.stack);
-    error('There was a problem updating server registration.'.red);
+      error(e);
+      error(e.stack);
+      error('There was a problem updating server registration.'.red);
   }
 }
 /**

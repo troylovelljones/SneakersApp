@@ -120,10 +120,11 @@ const register = async (token, traceId) => {
 (async () => {
   try {
     debug('Environment Variables');
-    debug(`${JSON.stringify(env, null, 2)}`);
+    debug(env);
     configureMiddleware();
     const traceId = startTrace(module);
     //start the app so that it can authenticate itself
+    info(`Starting app on port = ${PORT}`.green);
     const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
     !started && throwError('Authentication server could not be started');
     const password = await configFile.getValueFromConfigFile('PASSWORD');
@@ -132,8 +133,10 @@ const register = async (token, traceId) => {
      // <---------------AUTHENTICATION--------------->
      const { newPassword, tokens } = await authenticate(password, traceId);
     newPassword && debug(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
+    NODE_ENV !== 'prodction' && info('Tokens = ')  && info(tokens);
     // <---------------REGISTRATION----------------->
-    await register(tokens.accessToken, traceId);
+    const { id } = await register(tokens.accessToken, traceId);
+    await configFile.saveValueToConfigFile('SERVER_ID', id);
     appServices.onAppTermination(httpServer, hostIpAddress, REGISTRATION_SERVER_URL, tokens.accessToken);
     await updateModuleLoggingMetaData(module, { phase: 'ready' });
     stopTrace(module, traceId);
