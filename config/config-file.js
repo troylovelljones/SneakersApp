@@ -14,9 +14,22 @@ const { debug, error, getModuleLoggingMetaData } = require('../logging/logger/gl
  * @todo rewrite to use dotenv.parse()
  */
 class ConfigurationFile {
+  /**
+    * @private
+    * @type {string} The path where the configuration file is located.
+    */
   #file;
+  /**
+    * @private 
+    * @type {Map<string,string>} Contains the property, value pair from the configuration file.
+    */
   #keyValueMap;
+  /**
+    * @private 
+    * @type {boolean} Indicates if the configuration file has been loaded.
+    */
   #fileLoaded;
+  
   constructor() {
     this.#keyValueMap = new Map();
     this.#fileLoaded = false;
@@ -34,10 +47,11 @@ class ConfigurationFile {
 /**
  * Retrieves a property from the .cfg file.
  * 
- * @param {string} key property to retreive from the .cfg file
+ * @param {string} property The property to retreive from the .cfg file
+ * @returns {string} The value of the property (key)
  */
-  get(key) {
-    return this.#keyValueMap.get(key);
+  get(property) {
+    return this.#keyValueMap.get(property);
   }
 
 /**
@@ -76,7 +90,7 @@ class ConfigurationFile {
 /**
  * Saves a ".cfg" file.
  * @async
- * 
+ * @returns {Promise<object>}
  */
   async save() {
     if (!this.#fileLoaded) throw new Error('No configuration file loaded!');
@@ -103,7 +117,7 @@ class ConfigurationFile {
     * Writes the stored key values pairs to the .cfg file
     * @async
     * @private
-    * @returns {boolean} True is the properties were successfully writing to .cfg
+    * @returns {Promise<boolean>} True is the properties were successfully writing to .cfg
     * 
     */
   async #writeConfigToFile() {
@@ -118,7 +132,8 @@ class ConfigurationFile {
         debug('Value = ');
         //huh??
         debug(isNaN(keyValuePair[1]));
-        keyValuePair[1] = keyValuePair[1].toString().toUpperCase() === 'FALSE' ? 'FALSE' : keyValuePair[1];
+        let value = keyValuePair[1]
+        value = typeof value === 'string' && value.toString().toUpperCase() === 'FALSE' ? 'FALSE' : value;
         newData += keyValuePair.join('=').concat('\n');
       }
       await fs.writeFile(this.#file, newData);

@@ -135,8 +135,8 @@ const register = async (token, traceId) => {
     newPassword && debug(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
     NODE_ENV !== 'prodction' && info('Tokens = ')  && info(tokens);
     // <---------------REGISTRATION----------------->
-    const { id } = await register(tokens.accessToken, traceId);
-    await configFile.saveValueToConfigFile('SERVER_ID', id);
+    const registryInfo = await register(tokens.accessToken, traceId);
+    await configFile.saveValueToConfigFile('SERVER_ID', registryInfo._id);
     appServices.onAppTermination(httpServer, hostIpAddress, REGISTRATION_SERVER_URL, tokens.accessToken);
     await updateModuleLoggingMetaData(module, { phase: 'ready' });
     stopTrace(module, traceId);
