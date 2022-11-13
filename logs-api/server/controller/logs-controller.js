@@ -29,10 +29,11 @@ module.exports = {
 
     saveLogEntries: (req, res) => {
         //don't use await here
+
         logEntriesService.saveLogEntries(req.body).then( () => {
             res.status(200).send('Logs saved.');
         }).catch(err => {
-            error(JSON.stringify(err.stack, null, 2));
+            error(err.stack);
             !res.headersSent && res.status(500).send('Error saving logs.');
         });
     },
@@ -44,7 +45,8 @@ module.exports = {
         moduleQualityService.saveModuleQualityData(req.body).then (() => {
             res.status(200).send('Metrics saved.');
         }).catch(err => {
-            err && error(err);
+            error(req.body);
+            error(err);
             !res.headersSent && res.status(500).send('Error saving metrics');
         })
         

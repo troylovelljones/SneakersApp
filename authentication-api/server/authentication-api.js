@@ -5,7 +5,7 @@ const { resolve } = require('path');
 
 const app = express();
 const appServices = require('../../core/server/app/services/app-services');
-const configFile = require('../../config/config-file').getConfigFile(resolve(__dirname, '.cfg'));
+const { getValueFromConfigFile, saveValueToConfigFile } = require('../../config/config-file').getConfigFile(resolve(__dirname, '.cfg'));
 const devConstants = require('../../core/development/dev-constants');
 const getConnection = require('../../core/server/repository/databases/mongodb/mongo-database');
 const hostIpAddress = require('../../core/server/utils/host-ip');
@@ -33,7 +33,7 @@ const SERVER_NAME = process.env.SERVER_NAME || 'auth-api-svr';
 //logging
 const { debug, error, getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
 const { startTrace, stopTrace } = require('../../logging/logger/tracer');
-const { updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
+const { updateModuleLoggingMetaData, enableSendingQualityMetrics } = require('../../logging/logger/logger-manager');
 
 const { throwError } = require('../../core/validation/validation');
 
@@ -127,16 +127,17 @@ const register = async (token, traceId) => {
     info(`Starting app on port = ${PORT}`.green);
     const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
     !started && throwError('Authentication server could not be started');
-    const password = await configFile.getValueFromConfigFile('PASSWORD');
+    const password = await getValueFromConfigFile('PASSWORD');
     !password && throwError('Server configuration file is missing or invalid!');
     await getConnection();
      // <---------------AUTHENTICATION--------------->
      const { newPassword, tokens } = await authenticate(password, traceId);
-    newPassword && debug(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
+    newPassword && debug(`Saving new password.`) && await saveValueToConfigFile('PASSWORD', password);
     NODE_ENV !== 'prodction' && info('Tokens = ')  && info(tokens);
+    enableSendingQualityMetrics(tokens.accessToken);
     // <---------------REGISTRATION----------------->
     const registryInfo = await register(tokens.accessToken, traceId);
-    await configFile.saveValueToConfigFile('SERVER_ID', registryInfo._id);
+    await saveValueToConfigFile('SERVER_ID', registryInfo._id);
     appServices.onAppTermination(httpServer, hostIpAddress, REGISTRATION_SERVER_URL, tokens.accessToken);
     await updateModuleLoggingMetaData(module, { phase: 'ready' });
     stopTrace(module, traceId);

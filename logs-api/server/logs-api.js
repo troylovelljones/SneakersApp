@@ -36,7 +36,7 @@ const SERVER_ID = process.env.SERVER_ID;
 const { getModuleDependencies, waitFor } = require('../../core/server/utils/app-utils');
 
 //logging
-const {debug, error, getModuleLoggingMetaData } = require('../../logging/logger/global-logger')(module);
+const {debug, error, getModuleLoggingMetaData, info } = require('../../logging/logger/global-logger')(module);
 const { startTrace, stopTrace } = require('../../logging/logger/tracer');
 const {enableSendingQualityMetrics, updateModuleLoggingMetaData } = require('../../logging/logger/logger-manager');
 
@@ -46,6 +46,8 @@ debug(dependencies);
 module.getDependencies = () => dependencies;
 
 env.error && throwError(env.error);
+debug('Environment Variables');
+debug(env);
 
 
 /**
@@ -104,12 +106,12 @@ const register = async (registrationUrl, token, traceId) => {
         debug('Generated a random ip addres for testing.') && 
         devConstants.randomIpTuple() || ''),
       port: PORT,
-      endPoints: appServices.getRoutingdebugrmation(app),
+      endPoints: appServices.getRoutingInformation(app),
       serverId: SERVER_ID,
       traceId
     };
     debug('Sending server information to registry service.');
-    debug(`${JSON.stringify(serverdebug, null, 2)}`);
+    debug(`${JSON.stringify(serverInfo, null, 2)}`);
     debug(`Attempting to communicate with registration server at ${registrationUrl}`);
     const response = await appServices.registerServer(
       registrationUrl,
@@ -133,17 +135,16 @@ const register = async (registrationUrl, token, traceId) => {
 
 
 const startSendingLoggingMetrics = (accessToken) => {
-  debug('Registering access token = ') && debug(accessToken);
+  info('Registering access token = ') && debug(accessToken);
   return enableSendingQualityMetrics(accessToken);
 }
 
 (async () => {
   try {
-    debug('Environment Variables');
-    debug(env);
     configureMiddleware();
     const traceId = startTrace(module);
     const password = await configFile.getValueFromConfigFile('PASSWORD');
+    info(`Starting ${SERVER_NAME} on port ${PORT}`);
     !password && throwError('Server configuration file is missing or invalid!');
     await getConnection();
     const db = debug('Connecting to Mongo DB...') && await getConnection();
@@ -154,12 +155,13 @@ const startSendingLoggingMetrics = (accessToken) => {
     newPassword && debug(`Saving new password.`) && await configFile.saveValueToConfigFile('PASSWORD', password);
     // <---------------REGISTRATION----------------->
     await register(registrationUrl, tokens.accessToken, traceId);
+    info(`Logs-App-Server is authenticated and registered.`);
     updateModuleLoggingMetaData(module, { phase: 'ready' });
     //start the app so that it can receive logging debugrmation
     const { httpServer, started } = await appServices.startApp(app, SERVER_NAME, PORT);
     startSendingLoggingMetrics(tokens.accessToken);
     appServices.onAppTermination(httpServer, hostIpAddress, registrationUrl, tokens.accessToken);
-    !started && throwError('Authentication server could not be started');
+    !started && throwError('Logging server could not be started');
     stopTrace(module, traceId);
     // <------------SERVER START UP DONE------------->
   } catch (e) {

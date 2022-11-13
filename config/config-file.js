@@ -152,7 +152,7 @@ module.exports = {
     * Loads the configuration file at {@link filename}
     * 
     * @param {string} filename File path of the configuration file.
-    * @returns {{getValuefromConfigFile: function, saveValueToConfigFile: function}} An object containing two functions, {@link getValueFromConfigFile} and {@link saveValueToConfigFile}.
+    * @returns {{getValueFromConfigFile: function, saveValueToConfigFile: function}} An object containing two functions, {@link getValueFromConfigFile} and {@link saveValueToConfigFile}.
     * 
     */
   getConfigFile: (filename) => {

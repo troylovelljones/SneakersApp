@@ -14,8 +14,10 @@ const resetDatabase = false;
 //db.registry.deleteMany({});
 
 //db.server_health_data.find({});
-db.registry.deleteMany({});
-db.registry.find({});
+//db.registry.deleteMany({});
+//db.registry.find({});
+db.server_health_data.find({})
+//db.server_health_data.deleteMany({});
 
 
 

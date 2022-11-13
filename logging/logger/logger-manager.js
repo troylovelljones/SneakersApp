@@ -14,7 +14,8 @@ const axios = require('axios');
 const moduleName = getModuleName(module.filename);
 
 const env = require('dotenv').config({path: require.main.path + '/.env'});
-const BATCH_INTERVAL = process.env.BATCH_INTERVAL || 2000;
+const REMOTE_LOG_INTERVAL = process.env.REMOTE_LOG_INTERVAL || 3000;
+const REQUEST_BATCH_COUNT = process.env.REQUEST_BATCH_COUNT || 500;
 const HOST_IP = require('../../core/server/utils/host-ip');
 const LOG_METRICS_URL = process.env.LOG_METRICS_URL || 'sneakers-logger-api/server/metrics';
 const LOG_SERVER_PORT = process.env.LOG_SERVER_PORT || 4080;
@@ -70,8 +71,8 @@ function createModuleLoggingMetaData(metaData) {
   * @returns {number} An identifier which uniquely identify the process. This identifier is required to suspend sending metrics.
   */
  const enableSendingQualityMetrics = (accessToken) => { 
-  debug(`Access token registered, token = `) && debug(accessToken);  
-  return setInterval(updateModuleQualityData, BATCH_INTERVAL, {module: moduleName}, true, accessToken) 
+  logDebug(`Access token registered, token = `) && logDebug(accessToken);  
+  return setInterval(updateModuleQualityData, REMOTE_LOG_INTERVAL, {module: moduleName}, true, accessToken) 
 };
  
 
@@ -234,11 +235,11 @@ function getNewLogger(moduleName, options, trackModuleMetrics = true) {
   if (trackModuleMetrics && !listenersAdded) {
     logger.on('log-warn', data => { 
       logDebug('log-warn event recieved');
-      updateModuleQualityData({ module: data.module, newWarning: true }, false, null);
+      updateModuleQualityData({ module: data.module, warnings: 1, errors: 0 }, false, null);
     });
     logger.on('log-error', data => { 
       logDebug('log-warn event recieved');
-      updateModuleQualityData({ module: data.module, newError: true });
+      updateModuleQualityData({ module: data.module, errors: 1, warnings: 0 });
     });
     //no meta data has been assoicated with this logger yet so we use the default metaData defined in this module
     logger.debug('Listeners added', moduleLoggerMetaData);
@@ -319,17 +320,18 @@ const logInfo = (message) => {
   */
 const sendQualityMetrics = async (accessToken, moduleQualityMetrics) => {
 
-  debug('Sending Metrics.'.blue);
+  const requestCount = getRequestCount();
+  if (requestCount < REQUEST_BATCH_COUNT) return;
+  logDebug('Sending Metrics.'.blue);
   const url = `http://${HOST_IP}:${LOG_SERVER_PORT}/${LOG_METRICS_URL}`;
-  debug(`Sending metrics to endpoint = ${url}`);
-  debug('Sending module quality metrics.', moduleLoggerMetaData);
-  debug('Access token for sending quality metrics.');
-  debug(accessToken);
-  
+  logDebug(`Sending metrics to endpoint = ${url}`);
+  logDebug('Sending module quality metrics.', moduleQualityMetrics);
+  logDebug('Access token for sending quality metrics.');
+  logDebug(accessToken);
+
+  const data = { requestCount, serverName: SERVER_NAME, ipAddress: HOST_IP, date: new Date(), moduleQualityMetrics, SERVER_ID };
   try {
-    const data = { serverName: SERVER_NAME, ipAddress: HOST_IP, date: new Date(), moduleQualityMetrics, SERVER_ID };
     const header = setAuthHeader(accessToken);
-    data.requestCount = getRequestCount();
     logDebug('Module Quality Metrics Data = ')
     logDebug(data);
     logDebug('Sending request...');
@@ -338,8 +340,9 @@ const sendQualityMetrics = async (accessToken, moduleQualityMetrics) => {
     return response;
     
   } catch (e) {
-      e && logError(e, moduleLoggerMetaData);
-      e && logError(e.stack, moduleLoggerMetaData);
+      logError(data);
+      e && logError(e);
+      e && logError(e.stack);
   }
 }
 
@@ -510,7 +513,7 @@ const updateModuleLoggingMetaData = async (module, data) => {
 }
 
 /**
-  * This function synchonizes the logging metaData for a module
+  * This function updates the module quality information for a module.
   * 
   * @author Troy Lovell Jones
   * @param  { {module: object, newError: boolean, newWarning: boolean}} metricsData
@@ -521,63 +524,72 @@ const updateModuleLoggingMetaData = async (module, data) => {
   * @param {object} accessToken Access-token to use to authenticate with remote logging service
   */ 
 const updateModuleQualityData = async ({ module, errors, warnings }, flushMetrics = false, accessToken) => {
-  flushMetrics && logDebug('UMQD Access token = ') && logDebug(accessToken);
-  const validParameters = () => {
-    logDebug('ValidateParameters() arguments...');
-    logDebug('Access token = ') && logDebug(accessToken);
-    logDebug('Flush metrics = ') && logDebug(flushMetrics)
-    logDebug('Module = ') && logDebug(module);
-    return (accessToken && flushMetrics && module) || module && !accessToken && !flushMetrics;
-  }
-  
-  /**
-    * This function flushes the buffer of saved metrics into an Array.
-    * @author Troy Lovell Jones
-    * @returns {Array<{module: string, errorCount: number, warningCount: number}>} An array of metric data for each node module with logging enabled
-    */ 
-  const flushMetricsFromBuffer = () => {
-    const moduleQualityMetrics = [];
-    for (const module of moduleQualityMap.keys()) {
-      logDebug(`Getting module data for ${module}`);
-      const metrics = moduleQualityMap.get(module);
-      logDebug(`Getting metrics`);
-      logDebug(metrics);
-      moduleQualityMetrics.push(metrics);
+     
+    /**
+      * This function validates the inputs passed to {@link updateModuleQualityData}.
+      * @author Troy Lovell Jones
+      * @returns {boolean} True, indicating the inputs passed validation, false, indicating they did not
+      */ 
+    const validParameters = () => {
+      logDebug('ValidateParameters() arguments...');
+      logDebug('Access token = ') && logDebug(accessToken);
+      logDebug('Flush metrics = ') && logDebug(flushMetrics)
+      logDebug('Module = ') && logDebug(module);
+      return (accessToken && flushMetrics && module) || module && !accessToken && !flushMetrics;
+    }
+    
+    /**
+      * This function flushes the buffer of saved metrics into an Array.
+      * @author Troy Lovell Jones
+      * @returns {Array<{module: string, errorCount: number, warningCount: number}>} An array of metric data for each node module with logging enabled
+      */ 
+    const flushMetricsFromBuffer = () => {
+      const moduleQualityMetrics = [];
+      for (const module of moduleQualityMap.keys()) {
+        logDebug(`Getting module data for ${module}`);
+        const metrics = moduleQualityMap.get(module);
+        logDebug(`Getting metrics`);
+        logDebug(metrics);
+        moduleQualityMetrics.push(metrics);
+      }
       return moduleQualityMetrics;
     };
-  }
 
-  /**
-    * This function logs the warnings and errors for each node module in the project
-    * 
-    * @author Troy Lovell Jones
-    *
-    */ 
-  const logQualityMetrics = () => {
-    !validParameters() && throwError('Invalid parameter, module cannot be null!');
-    logDebug('Updating module quality.', moduleLoggerMetaData);
-    let { errorCount, warningCount } = moduleQualityMap.get(module) || { errorCount: 0, warningCount: 0 };
-    errorCount += errors;
-    warningCount += warnings;
-    logDebug(`Total errors = ${errorCount}`, moduleLoggerMetaData);
-    logDebug(`Total warnings = ${warningCount}`, moduleLoggerMetaData);
-    moduleQualityMap.set(module, { module, errorCount, warningCount });
-  }
+    /**
+      * This function logs the warnings and errors for each node module in the project
+      * 
+      * @author Troy Lovell Jones
+      *
+      */ 
+    const logQualityMetrics = () => {
+      !validParameters() && throwError('Invalid parameter, module cannot be null!');
+      logDebug(`New data recieved, errors = ${errors}, warnings = ${warnings}.`);
+      logDebug('Updating module quality.', moduleLoggerMetaData);
+      const errorCount = moduleQualityMap.get(module) && moduleQualityMap.get(module).errorCount || 0
+      const warningCount = moduleQualityMap.get(module) && moduleQualityMap.get(module).warningCount || 0;
+      const updatedMetrics = { module, errorCount: errorCount + errors, warningCount: warningCount + warnings };
+      moduleQualityMap.set(module, updatedMetrics);
+      logDebug(`Total errors = ${errorCount}`, moduleLoggerMetaData);
+      logDebug(`Total warnings = ${warningCount}`, moduleLoggerMetaData);
+      logDebug(moduleQualityMap);
+    }
 
   try {
-
+     flushMetrics && logDebug('UMQD Access token = ') && logDebug(accessToken);
     !validParameters() && throwError('In order to flush the buffers an authenticaton token must be supplied');
     if (flushMetrics) {
       const moduleQualityMetrics = flushMetricsFromBuffer();
+      logInfo('Sending quality metrics');
+      logInfo(moduleQualityMetrics);
       await sendQualityMetrics(accessToken, moduleQualityMetrics) && moduleQualityMap.clear();
     } 
     else logQualityMetrics();
-        return true;
-    } catch (e) {
-        logError('There was an error sending module quality data');
-        e && logError(e);
-        e.stack && logError(e.stack);
-    }
+    return true;
+  } catch (e) {
+      logError('There was an error sending module quality data');
+      e && logError(e);
+      e.stack && logError(e.stack);
+  }
 }
 
 /**
